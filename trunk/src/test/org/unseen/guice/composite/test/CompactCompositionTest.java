@@ -20,7 +20,7 @@ import org.unseen.guice.composite.test.mocks.ServerImpl;
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
 
-public class CompactMultiInjectorTest {
+public class CompactCompositionTest {
   @Test
   public void testRuntimeScopes() {
     Injector inj = createInjector(new CompositionModule() {

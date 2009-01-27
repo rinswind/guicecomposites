@@ -19,7 +19,7 @@ import org.unseen.guice.composite.test.mocks.ServerImpl;
 
 import com.google.inject.AbstractModule;
 
-public class MultiInjectorTest {
+public class CompositionTest {
   static class ServerSpace extends CompositionModule {
     @Override
     protected void configure() {
