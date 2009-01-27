@@ -11,7 +11,6 @@ import java.util.List;
 import com.google.inject.AbstractModule;
 import com.google.inject.Binder;
 import com.google.inject.Binding;
-import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.Module;
@@ -23,7 +22,7 @@ import com.google.inject.util.Providers;
 /**
  * Implements a single factory method.
  */
-public class FactoryMethod {
+public class CompositeFactoryMethod {
   /**
    * If a factory method parameter isn't annotated, it gets this annotation.
    */
@@ -61,7 +60,7 @@ public class FactoryMethod {
    * @param errors
    * @throws ErrorsException
    */
-  public FactoryMethod(Method method, Errors errors) throws ErrorsException {
+  public CompositeFactoryMethod(Method method, Errors errors) throws ErrorsException {
     this.method = method;
     
     this.result = getKey(
@@ -110,11 +109,7 @@ public class FactoryMethod {
       }
     };
     
-    Injector child = parent != null
-      ? parent.createChildInjector(composition)
-      : Guice.createInjector(composition);
-      
-    return child.getBinding(result);
+    return parent.createChildInjector(composition).getBinding(result);
   }
 
   /**

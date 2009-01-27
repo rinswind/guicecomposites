@@ -7,7 +7,7 @@ import com.google.inject.binder.LinkedBindingBuilder;
  * @author Todor Boev
  * @param <T>
  */
-public interface CompositionLinkedBindingBuilder<T> extends LinkedBindingBuilder<T> {
+public interface CompositeLinkedBindingBuilder<T> extends LinkedBindingBuilder<T> {
   void toComposition(Iterable<Module> modules);
   
   void toComposition(Module... modules);
