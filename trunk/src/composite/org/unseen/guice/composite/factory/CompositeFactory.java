@@ -80,7 +80,7 @@ public class CompositeFactory<F> implements InvocationHandler {
     }
 
     /* For the factory methods use an appropriate binding */
-    Provider<?> provider = methods.get(method).createComposition(parent, composed, args).getProvider();
+    Provider<?> provider = methods.get(method).invoke(parent, composed, args).getProvider();
     try {
       return provider.get();
     } catch (ProvisionException e) {

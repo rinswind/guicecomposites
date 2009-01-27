@@ -11,4 +11,6 @@ public interface CompositeLinkedBindingBuilder<T> extends LinkedBindingBuilder<T
   void toComposition(Iterable<Module> modules);
   
   void toComposition(Module... modules);
+  
+  void toComposition(Class<?> impl);
 }
