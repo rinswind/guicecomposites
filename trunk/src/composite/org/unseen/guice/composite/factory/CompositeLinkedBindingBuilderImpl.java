@@ -29,27 +29,19 @@ public class CompositeLinkedBindingBuilderImpl<T> implements CompositeLinkedBind
     toComposition(Arrays.asList(modules));
   }
   
+  @SuppressWarnings("unchecked")
   public void toComposition(final Class<?> impl) {
-    final Key implKey = Key.get(impl);
-    final Class<?>[] ifaces = impl.getInterfaces();
-    
-    if (ifaces.length > 0) {
-      toComposition(new AbstractModule() {
-        @Override
-        protected void configure() {
-          for (Class<?> iface : ifaces) {
-            bind(Key.get(iface)).to(implKey);
-          }
+    toComposition(new AbstractModule() {
+      @Override
+      protected void configure() {
+        Key implKey = Key.get(impl);
+        
+        bind(implKey);
+        for (Class<?> iface : impl.getInterfaces()) {
+          bind(Key.get(iface)).to(implKey);
         }
-      });
-    } else {
-      toComposition(new AbstractModule() {
-        @Override
-        protected void configure() {
-          bind(impl);
-        }
-      });
-    }
+      }
+    });
   }
   
   @SuppressWarnings("unchecked")
