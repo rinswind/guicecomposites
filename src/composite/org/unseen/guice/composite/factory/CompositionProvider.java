@@ -7,6 +7,8 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.lang.reflect.Type;
+import java.util.Arrays;
+import java.util.List;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Binder;
@@ -24,7 +26,6 @@ import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
 import com.google.inject.internal.collect.ImmutableList;
 import com.google.inject.internal.collect.ImmutableMap;
-import com.google.inject.internal.collect.ImmutableMultimap;
 import com.google.inject.spi.Message;
 import com.google.inject.util.Providers;
 
@@ -34,7 +35,7 @@ import com.google.inject.util.Providers;
  *
  * @param <F>
  */
-public  class CompositionProvider<F> implements InvocationHandler, Provider<F> {
+public  class CompositionProvider<F> implements Provider<F> {
   /**
    * If a factory method parameter isn't annotated, it gets this annotation.
    */
@@ -63,17 +64,60 @@ public  class CompositionProvider<F> implements InvocationHandler, Provider<F> {
     }
   };
 
-  /** The factory interface, implemented and provided */
-  private final F factory;
-  
-  /*
-   * These two really form a list of reflective factory method signatures.
-   * Except these are described in terms of Key rather than Class.
+  /**
+   * An immutable reflective method signature expressed in terms of Key rather
+   * than Class.
    */
-  /** Factory method to return type */
-  private final ImmutableMap<Method, Key<?>> returnTypesByMethod;
-  /** Factory method to parameter types */
-  private final ImmutableMultimap<Method, Key<?>> paramTypes;
+  private static class MethodSig {
+    final Key<?> result;
+    final List<Key<?>> params;
+    
+    public MethodSig(Method method, Errors errors) throws ErrorsException {
+      this.result = getKey(
+          TypeLiteral.get(method.getGenericReturnType()), method, method.getAnnotations(), errors);
+      
+      Type[] paramTypes = method.getGenericParameterTypes();
+      Annotation[][] paramAnnotations = method.getParameterAnnotations();
+      Key<?>[] paramArray = new Key<?>[paramTypes.length];
+      for (int p = 0; p < paramArray.length; p++) {
+        paramArray[p] = paramKey(
+            method, 
+            getKey(TypeLiteral.get(paramTypes[p]), method, paramAnnotations[p], errors), 
+            errors);
+      }
+      
+      /* The wrapped list is immutable */
+      this.params = Arrays.asList(paramArray);
+    }
+    
+    /**
+     * Returns a key similar to {@code key}, but with an {@literal @}Parameter
+     * binding annotation. This fails if another binding annotation is clobbered
+     * in the process. If the key already has the {@literal @}Parameter annotation,
+     * it is returned as-is to preserve any String value.
+     */
+    private static <T> Key<T> paramKey(Method method, Key<T> key, Errors errors) throws ErrorsException {
+      Class<? extends Annotation> annotation = key.getAnnotationType();
+      
+      if (annotation == null) {
+        return Key.get(key.getTypeLiteral(), DEFAULT_ANNOTATION);
+      }
+
+      if (annotation == Parameter.class) {
+        return key;
+      }
+
+      throw errors
+        .withSource(method)
+        .addMessage("Only @Parameter is allowed for factory parameters, but found @%s", annotation)
+        .toException();
+    }
+  }
+  
+  /** Dynamically generated implementation of the factory */
+  private final F factory;
+  /** Implementations of the factory methods */ 
+  private final ImmutableMap<Method, MethodSig> factoryMethods;
 
   /**
    * The hosting Injector, or null if we haven't been initialized yet or this is
@@ -83,40 +127,67 @@ public  class CompositionProvider<F> implements InvocationHandler, Provider<F> {
   private Iterable<Module> composed;
   
   /**
-   * @param compositionFactory a Java interface that defines one or more create
-   *          methods.
-   * @param producedType a concrete type that is assignable to the return types
-   *          of all factory methods.
+   * @param factoryIface
+   * @param composed
    */
-  public CompositionProvider(Class<F> compositionFactory, Iterable<Module> composed) {
+  public CompositionProvider(Class<F> factoryIface, Iterable<Module> composed) {
     this.composed = composed;
     
     Errors errors = new Errors();
     try {
-      ImmutableMap.Builder<Method, Key<?>> returnTypesBuilder = ImmutableMap.builder();
-      ImmutableMultimap.Builder<Method, Key<?>> paramTypesBuilder = ImmutableMultimap.builder();
-
+      ImmutableMap.Builder<Method, MethodSig> factoryMethodsBuilder = ImmutableMap.builder();
       // TODO: also grab methods from superinterfaces
-      for (Method method : compositionFactory.getMethods()) {
-        Key<?> returnType = getKey(TypeLiteral.get(method.getGenericReturnType()), method, method.getAnnotations(), errors);
-        returnTypesBuilder.put(method, returnType);
-        
-        Type[] params = method.getGenericParameterTypes();
-        Annotation[][] paramAnnotations = method.getParameterAnnotations();
-        int p = 0;
-        for (Type param : params) {
-          Key<?> paramKey = getKey(TypeLiteral.get(param), method, paramAnnotations[p++], errors);
-          paramTypesBuilder.put(method, assistKey(method, paramKey, errors));
-        }
+      for (Method method : factoryIface.getMethods()) {
+        factoryMethodsBuilder.put(method, new MethodSig(method, errors));
       }
-      returnTypesByMethod = returnTypesBuilder.build();
-      paramTypes = paramTypesBuilder.build();
+      this.factoryMethods = factoryMethodsBuilder.build();
     } catch (ErrorsException e) {
       throw new ConfigurationException(e.getErrors().getMessages());
     }
 
-    factory = compositionFactory.cast(Proxy.newProxyInstance(compositionFactory.getClassLoader(),
-        new Class[] { compositionFactory }, this));
+    this.factory = factoryIface.cast(Proxy.newProxyInstance(
+      /*
+       * FIX Can cause trouble under OSGi. The problem here is that this class
+       * loader is different from the class loader that contains the internal
+       * classes we use to support this proxy. We need a class loader bridge that
+       *  will delegate the loading of our internal classes to our loader and
+       * everything else to the loader of the factory interface.
+       */
+      factoryIface.getClassLoader(),
+      new Class[] { factoryIface }, 
+      new InvocationHandler() {
+        public Object invoke(Object proxy, final Method method, final Object[] args) throws Throwable {
+          /* Delegate equals, toString, hashCode to this factory */
+          if (method.getDeclaringClass() == Object.class) {
+            return method.invoke(this, args);
+          }
+
+          /* For the factory methods use an appropriate binding */
+          Provider<?> provider = getBindingFromNewComposition(method, args).getProvider();
+          try {
+            return provider.get();
+          } catch (ProvisionException e) {
+            /* If this is an exception declared by the factory method, throw it as-is */
+            if (e.getErrorMessages().size() == 1) {
+              Throwable cause = e.getErrorMessages().iterator().next().getCause();
+              if (cause != null && canRethrow(method, cause)) {
+                throw cause;
+              }
+            }
+            throw e;
+          }
+        }
+        
+        @Override
+        public String toString() {
+          return factory.getClass().getInterfaces()[0].getName();
+        }
+        
+        @Override
+        public boolean equals(Object o) {
+          return o == this || o == factory;
+        }
+      }));
   }
 
   /**
@@ -149,65 +220,26 @@ public  class CompositionProvider<F> implements InvocationHandler, Provider<F> {
   }
 
   /**
-   * When a factory method is invoked, we create a child injector that binds all
-   * parameters, then use that to get an instance of the return type.
-   */
-  public Object invoke(Object proxy, final Method method, final Object[] args) throws Throwable {
-    /* Delegate equals, toString, hashCode to this factory */
-    if (method.getDeclaringClass() == Object.class) {
-      return method.invoke(this, args);
-    }
-
-    /* For the factory methods use an appropriate binding */
-    Provider<?> provider = getBindingFromNewChildSpace(method, args).getProvider();
-    try {
-      return provider.get();
-    } catch (ProvisionException e) {
-      /* If this is an exception declared by the factory method, throw it as-is */
-      if (e.getErrorMessages().size() == 1) {
-        Throwable cause = e.getErrorMessages().iterator().next().getCause();
-        if (cause != null && canRethrow(method, cause)) {
-          throw cause;
-        }
-      }
-      throw e;
-    }
-  }
-  
-  @Override
-  public String toString() {
-    return factory.getClass().getInterfaces()[0].getName();
-  }
-  
-  @Override
-  public boolean equals(Object o) {
-    return o == this || o == factory;
-  }
-
-  /**
    * Creates a child injector that binds the args, and returns the binding for
    * the method's result.
    */
-  private Binding<?> getBindingFromNewChildSpace(final Method method, final Object[] args) {
-    final Key<?> returnType = returnTypesByMethod.get(method);
+  private Binding<?> getBindingFromNewComposition(final Method method, final Object[] args) {
+    final MethodSig sig = factoryMethods.get(method);
 
     /* Add a module with the parameter and return type bindings */
-    Module child = new AbstractModule() {
+    Module composition = new AbstractModule() {
+      /* Raw keys are necessary for the args array and return value */
       @SuppressWarnings("unchecked")
-      // raw keys are necessary for the args array and return value
       protected void configure() {
         Binder binder = binder().withSource(method);
 
-        /*
-         * Set up providers for the config parameters. Wrap them in providers to
-         * allow null, and to prevent them from leaking to the parent space.
-         */
+        /* Introduce the external parameters into the composition instance. */
         int p = 0;
-        for (Key<?> paramKey : paramTypes.get(method)) {
+        for (Key<?> paramKey : sig.params) {
           binder.bind((Key) paramKey).toProvider(Providers.of(args[p++]));
         }
 
-        /* Add the content of the child space */
+        /* Add the content of the composition */
         for (Module m : composed) {
           install(m);
         }
@@ -215,33 +247,10 @@ public  class CompositionProvider<F> implements InvocationHandler, Provider<F> {
     };
     
     Injector childSpace = parentSpace != null 
-      ? parentSpace.createChildInjector(child)
-      : Guice.createInjector(child);
+      ? parentSpace.createChildInjector(composition)
+      : Guice.createInjector(composition);
       
-    return childSpace.getBinding(returnType);
-  }
-
-  /**
-   * Returns a key similar to {@code key}, but with an {@literal @}External
-   * binding annotation. This fails if another binding annotation is clobbered
-   * in the process. If the key already has the {@literal @}External annotation,
-   * it is returned as-is to preserve any String value.
-   */
-  private <T> Key<T> assistKey(Method method, Key<T> key, Errors errors) throws ErrorsException {
-    Class<? extends Annotation> annotation = key.getAnnotationType();
-    
-    if (annotation == null) {
-      return Key.get(key.getTypeLiteral(), DEFAULT_ANNOTATION);
-    }
-
-    if (annotation == Parameter.class) {
-      return key;
-    }
-
-    throw errors
-      .withSource(method)
-      .addMessage("Only @External is allowed for factory parameters, but found @%s", annotation)
-      .toException();
+    return childSpace.getBinding(sig.result);
   }
 
   /**
