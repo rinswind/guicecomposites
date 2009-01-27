@@ -3,6 +3,7 @@ package org.unseen.guice.composite.test;
 import static com.google.inject.Guice.createInjector;
 import static com.google.inject.Scopes.SINGLETON;
 import static junit.framework.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 import org.unseen.guice.composite.factory.CompositeModule;
@@ -60,23 +61,31 @@ public class CompositeModulesTest {
     
     assertTrue(conn1 != conn2);
     
+    assertEquals("host1", conn1.host());
+    
     assertTrue(req11 != req12);
     
+    assertEquals("request11", req11.parameter());
     assertTrue(req11.connection() == conn1);
     assertTrue(req11.response().connection() == conn1);
     /* Must use equals because Request<->Response form a loop */
     assertTrue(req11.response().request().equals(req11));
- 
+    
+    assertEquals("request12", req12.parameter());
     assertTrue(req12.connection() == conn1);
     assertTrue(req12.response().connection() == conn1);
     assertTrue(req12.response().request().equals(req12));
     
+    assertEquals("host2", conn2.host());
+    
     assertTrue(req21 != req22);
     
+    assertEquals("request21", req21.parameter());
     assertTrue(req21.connection() == conn2);
     assertTrue(req21.response().connection() == conn2);
     assertTrue(req21.response().request().equals(req21));
  
+    assertEquals("request22", req22.parameter());
     assertTrue(req22.connection() == conn2);
     assertTrue(req22.response().connection() == conn2);
     assertTrue(req22.response().request().equals(req22));
