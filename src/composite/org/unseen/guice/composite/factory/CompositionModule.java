@@ -5,7 +5,6 @@ import java.lang.reflect.Method;
 
 import org.aopalliance.intercept.MethodInterceptor;
 
-import com.google.inject.AbstractModule;
 import com.google.inject.Binder;
 import com.google.inject.Key;
 import com.google.inject.Module;
@@ -13,9 +12,7 @@ import com.google.inject.Provider;
 import com.google.inject.Scope;
 import com.google.inject.Stage;
 import com.google.inject.TypeLiteral;
-import com.google.inject.binder.AnnotatedBindingBuilder;
 import com.google.inject.binder.AnnotatedConstantBindingBuilder;
-import com.google.inject.binder.LinkedBindingBuilder;
 import com.google.inject.matcher.Matcher;
 import com.google.inject.spi.Message;
 import com.google.inject.spi.TypeConverter;
@@ -46,21 +43,20 @@ public abstract class CompositionModule implements Module {
     return binder;
   }
 
-  protected void bindScope(Class<? extends Annotation> scopeAnnotation,
-      Scope scope) {
-    binder.bindScope(scopeAnnotation, scope);
-  }
-
   protected <T> CompositionLinkedBindingBuilder<T> bind(Key<T> key) {
-    return new binder.bind(key);
+    return Composition.bind(binder, key);
   }
 
   protected <T> CompositionAnnotatedBindingBuilder<T> bind(TypeLiteral<T> typeLiteral) {
-    return binder.bind(typeLiteral);
+    return Composition.bind(binder, typeLiteral);
   }
 
   protected <T> CompositionAnnotatedBindingBuilder<T> bind(Class<T> clazz) {
-    return binder.bind(clazz);
+    return Composition.bind(binder, clazz);
+  }
+  
+  protected void bindScope(Class<? extends Annotation> scopeAnnotation, Scope scope) {
+    binder.bindScope(scopeAnnotation, scope);
   }
 
   protected AnnotatedConstantBindingBuilder bindConstant() {

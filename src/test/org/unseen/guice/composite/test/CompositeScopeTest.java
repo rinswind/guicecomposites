@@ -15,7 +15,7 @@ import com.google.inject.Provider;
  * @author Todor Boev
  *
  */
-public class CompositeTests {
+public class CompositeScopeTest {
   public static class Root {
     @Inject Left left;
     @Inject Left right;
