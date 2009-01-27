@@ -11,17 +11,17 @@ import com.google.inject.TypeLiteral;
 import com.google.inject.binder.LinkedBindingBuilder;
 import com.google.inject.binder.ScopedBindingBuilder;
 
-public class CompositionLinkedBindingBuilderImpl<T> implements CompositionLinkedBindingBuilder<T> {
+public class CompositeLinkedBindingBuilderImpl<T> implements CompositeLinkedBindingBuilder<T> {
   private final Key<T> key;
   private final LinkedBindingBuilder<T> wrapped;
   
-  public CompositionLinkedBindingBuilderImpl(Key<T> key, LinkedBindingBuilder<T> wrapped) {
+  public CompositeLinkedBindingBuilderImpl(Key<T> key, LinkedBindingBuilder<T> wrapped) {
     this.key = key;
     this.wrapped = wrapped;
   }
   
   public void toComposition(Iterable<Module> modules) {
-    toProvider(new CompositionProvider(key.getTypeLiteral().getRawType(), modules));
+    toProvider(new CompositeProvider(key.getTypeLiteral().getRawType(), modules));
   }
 
   public void toComposition(Module... modules) {

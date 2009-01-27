@@ -5,7 +5,7 @@ import static com.google.inject.Scopes.SINGLETON;
 import static junit.framework.Assert.assertTrue;
 
 import org.junit.Test;
-import org.unseen.guice.composite.factory.CompositionModule;
+import org.unseen.guice.composite.factory.CompositeModule;
 import org.unseen.guice.composite.test.mocks.Connection;
 import org.unseen.guice.composite.test.mocks.ConnectionFactory;
 import org.unseen.guice.composite.test.mocks.ConnectionImpl;
@@ -20,15 +20,15 @@ import org.unseen.guice.composite.test.mocks.ServerImpl;
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
 
-public class CompactCompositionTest {
+public class CompositeModulesTest {
   @Test
   public void testRuntimeScopes() {
-    Injector inj = createInjector(new CompositionModule() {
+    Injector inj = createInjector(new CompositeModule() {
       @Override
       protected void configure() {
         bind(Server.class).to(ServerImpl.class).in(SINGLETON);
         
-        bind(ConnectionFactory.class).toComposition(new CompositionModule() {
+        bind(ConnectionFactory.class).toComposition(new CompositeModule() {
           @Override
           protected void configure() {
             bind(Connection.class).to(ConnectionImpl.class).in(SINGLETON);

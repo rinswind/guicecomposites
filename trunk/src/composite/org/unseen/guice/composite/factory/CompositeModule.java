@@ -21,7 +21,7 @@ import com.google.inject.spi.TypeConverter;
  * @author Todor Boev
  *
  */
-public abstract class CompositionModule implements Module {
+public abstract class CompositeModule implements Module {
   private Binder binder;
 
   public final synchronized void configure(Binder builder) {
@@ -43,16 +43,16 @@ public abstract class CompositionModule implements Module {
     return binder;
   }
 
-  protected <T> CompositionLinkedBindingBuilder<T> bind(Key<T> key) {
-    return Composition.bind(binder, key);
+  protected <T> CompositeLinkedBindingBuilder<T> bind(Key<T> key) {
+    return Composite.bind(binder, key);
   }
 
-  protected <T> CompositionAnnotatedBindingBuilder<T> bind(TypeLiteral<T> typeLiteral) {
-    return Composition.bind(binder, typeLiteral);
+  protected <T> CompositeAnnotatedBindingBuilder<T> bind(TypeLiteral<T> typeLiteral) {
+    return Composite.bind(binder, typeLiteral);
   }
 
-  protected <T> CompositionAnnotatedBindingBuilder<T> bind(Class<T> clazz) {
-    return Composition.bind(binder, clazz);
+  protected <T> CompositeAnnotatedBindingBuilder<T> bind(Class<T> clazz) {
+    return Composite.bind(binder, clazz);
   }
   
   protected void bindScope(Class<? extends Annotation> scopeAnnotation, Scope scope) {
