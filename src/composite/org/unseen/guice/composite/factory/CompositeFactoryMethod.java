@@ -70,10 +70,7 @@ public class CompositeFactoryMethod {
     Annotation[][] paramAnnotations = method.getParameterAnnotations();
     Key<?>[] paramArray = new Key<?>[paramTypes.length];
     for (int p = 0; p < paramArray.length; p++) {
-      paramArray[p] = paramKey(
-          method, 
-          getKey(TypeLiteral.get(paramTypes[p]), method, paramAnnotations[p], errors), 
-          errors);
+      paramArray[p] = paramKey(paramTypes[p], method, paramAnnotations[p], errors);
     }
     
     /* The wrapped list is immutable */
@@ -81,17 +78,17 @@ public class CompositeFactoryMethod {
   }
   
   /**
+   * Create a new injector based at the parent, populate it with the
+   * parameters and the user definitions and return a binding to the class
+   * that the factory must produce.
+   * 
    * @param parent
    * @param composed
    * @param args
    * @return
    */
-  public Binding<?> createComposition(
-      Injector parent, final Iterable<Module> composed, final Object[] args) {
-    
-    /* Add a module with the parameter and return type bindings */
-    Module composition = new AbstractModule() {
-      /* Raw keys are necessary for the args array and return value */
+  public Binding<?> invoke(Injector parent, final Iterable<Module> composed, final Object[] args) {
+    return parent.createChildInjector(new AbstractModule() {
       @SuppressWarnings("unchecked")
       protected void configure() {
         Binder binder = binder().withSource(method);
@@ -107,9 +104,7 @@ public class CompositeFactoryMethod {
           install(m);
         }
       }
-    };
-    
-    return parent.createChildInjector(composition).getBinding(result);
+    }).getBinding(result);
   }
 
   /**
@@ -118,7 +113,11 @@ public class CompositeFactoryMethod {
    * in the process. If the key already has the {@literal @}Parameter annotation,
    * it is returned as-is to preserve any String value.
    */
-  private static <T> Key<T> paramKey(Method method, Key<T> key, Errors errors) throws ErrorsException {
+  private static Key<?> paramKey(Type type, Method method, Annotation[] annotations, Errors errors) 
+    throws ErrorsException {
+    
+    Key<?> key = getKey(TypeLiteral.get(type), method, annotations, errors); 
+
     Class<? extends Annotation> annotation = key.getAnnotationType();
     
     if (annotation == null) {

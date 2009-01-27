@@ -3,6 +3,7 @@ package org.unseen.guice.composite.factory;
 import java.lang.annotation.Annotation;
 import java.util.Arrays;
 
+import com.google.inject.AbstractModule;
 import com.google.inject.Key;
 import com.google.inject.Module;
 import com.google.inject.Provider;
@@ -11,6 +12,10 @@ import com.google.inject.TypeLiteral;
 import com.google.inject.binder.LinkedBindingBuilder;
 import com.google.inject.binder.ScopedBindingBuilder;
 
+/**
+ * @author Todor Boev
+ * @param <T>
+ */
 public class CompositeLinkedBindingBuilderImpl<T> implements CompositeLinkedBindingBuilder<T> {
   private final Key<T> key;
   private final LinkedBindingBuilder<T> wrapped;
@@ -20,12 +25,36 @@ public class CompositeLinkedBindingBuilderImpl<T> implements CompositeLinkedBind
     this.wrapped = wrapped;
   }
   
-  public void toComposition(Iterable<Module> modules) {
-    toProvider(new CompositeProvider(key.getTypeLiteral().getRawType(), modules));
-  }
-
   public void toComposition(Module... modules) {
     toComposition(Arrays.asList(modules));
+  }
+  
+  public void toComposition(final Class<?> impl) {
+    final Key implKey = Key.get(impl);
+    final Class<?>[] ifaces = impl.getInterfaces();
+    
+    if (ifaces.length > 0) {
+      toComposition(new AbstractModule() {
+        @Override
+        protected void configure() {
+          for (Class<?> iface : ifaces) {
+            bind(Key.get(iface)).to(implKey);
+          }
+        }
+      });
+    } else {
+      toComposition(new AbstractModule() {
+        @Override
+        protected void configure() {
+          bind(impl);
+        }
+      });
+    }
+  }
+  
+  @SuppressWarnings("unchecked")
+  public void toComposition(Iterable<Module> modules) {
+    toProvider(new CompositeProvider(key.getTypeLiteral().getRawType(), modules));
   }
 
   public ScopedBindingBuilder to(Class<? extends T> implementation) {
