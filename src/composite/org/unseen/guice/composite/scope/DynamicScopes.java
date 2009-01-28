@@ -8,7 +8,7 @@ public class DynamicScopes {
   private DynamicScopes() {
   }
   
-  public static Scope dynamicScope(Class<? extends Annotation> tag) {
+  public static Scope get(Class<? extends Annotation> tag) {
     return new DynamicScope(tag);
   }
 }

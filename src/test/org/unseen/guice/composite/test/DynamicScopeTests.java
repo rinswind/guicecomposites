@@ -22,28 +22,31 @@ import com.google.inject.ScopeAnnotation;
  * @author Todor Boev
  *
  */
-public class CompositeScopeTest {
+public class DynamicScopeTests {
+  @ScopeAnnotation
+  @Retention(RUNTIME)
+  @Target({TYPE, METHOD})
+  @interface DiamondScoped {
+  }
+  
+  @DiamondScoped
   public static class Root {
     @Inject Left left;
     @Inject Left right;
   }
   
+  @DiamondScoped
   public static class Left {
     @Inject Peak peak;
   }
   
+  @DiamondScoped
   public static class Right {
     @Inject Peak peak;
   }
   
+  @DiamondScoped
   public static class Peak {
-  }
-  
-  
-  @ScopeAnnotation
-  @Retention(RUNTIME)
-  @Target({TYPE, METHOD})
-  @interface TestScope {
   }
   
   @Test
@@ -51,12 +54,7 @@ public class CompositeScopeTest {
     Injector inj = Guice.createInjector(new AbstractModule() {
       @Override
       protected void configure() {
-        bindScope(TestScope.class, DynamicScopes.dynamicScope(TestScope.class));
-        
-        bind(Root.class).in(TestScope.class);
-        bind(Left.class).in(TestScope.class);
-        bind(Right.class).in(TestScope.class);
-        bind(Peak.class).in(TestScope.class);
+        bindScope(DiamondScoped.class, DynamicScopes.get(DiamondScoped.class));
       }
     });
     
