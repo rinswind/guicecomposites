@@ -73,6 +73,7 @@ public class NestingTest {
     Request request();
   }  
   
+  @ServerScoped
   public static class ServerImpl implements Server {
     private final ConnectionFactory connections;
     
@@ -86,6 +87,7 @@ public class NestingTest {
     }
   }
   
+  @ConnectionScoped
   public static class ConnectionImpl implements Connection {
     private final Server server;
     private final RequestFactory requests;
@@ -105,6 +107,7 @@ public class NestingTest {
     }
   }
   
+  @RequestScoped
   public static class RequestImpl implements Request {
     private final Connection conn;
     private final Response resp;
@@ -124,6 +127,7 @@ public class NestingTest {
     }
   }  
   
+  @RequestScoped
   public static class ResponseImpl implements Response {
     private final Connection conn;
     private final Request req;
@@ -152,23 +156,26 @@ public class NestingTest {
         bindScope(ConnectionScoped.class, scope(ConnectionScoped.class));
         bindScope(RequestScoped.class, scope(RequestScoped.class));
         
+        /* The ServerFactory lives in no scope and creates ServerScoped */
         bind(ServerFactory.class)
         .toProvider(factory(ServerFactory.class, ServerScoped.class));
         
-        bind(Server.class).to(ServerImpl.class).in(ServerScoped.class);
+        bind(Server.class).to(ServerImpl.class);
         
+        /* The ConnectionFactory lives in ServerScoped but creates ConnectionScoped */
         bind(ConnectionFactory.class)
         .toProvider(factory(ConnectionFactory.class, ConnectionScoped.class))
         .in(ServerScoped.class);
         
-        bind(Connection.class).to(ConnectionImpl.class).in(ConnectionScoped.class);
+        bind(Connection.class).to(ConnectionImpl.class);
         
+        /* The request factory lives in ConnectionScoped and creates RequestScoped */
         bind(RequestFactory.class)
         .toProvider(factory(RequestFactory.class, RequestScoped.class))
         .in(ConnectionScoped.class);
         
-        bind(Request.class).to(RequestImpl.class).in(RequestScoped.class);
-        bind(Response.class).to(ResponseImpl.class).in(RequestScoped.class);
+        bind(Request.class).to(RequestImpl.class);
+        bind(Response.class).to(ResponseImpl.class);
       }
     });
     
