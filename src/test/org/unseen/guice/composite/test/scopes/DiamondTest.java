@@ -1,4 +1,4 @@
-package org.unseen.guice.composite.test;
+package org.unseen.guice.composite.test.scopes;
 
 import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.ElementType.TYPE;
@@ -9,20 +9,19 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 import org.junit.Test;
-import org.unseen.guice.composite.scope.DynamicScopes;
+import org.unseen.guice.composite.scopes.DynamicScopes;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
-import com.google.inject.Provider;
 import com.google.inject.ScopeAnnotation;
 
 /**
  * @author Todor Boev
  *
  */
-public class DynamicScopeTests {
+public class DiamondTest {
   @ScopeAnnotation
   @Retention(RUNTIME)
   @Target({TYPE, METHOD})
@@ -49,19 +48,24 @@ public class DynamicScopeTests {
   public static class Peak {
   }
   
+  public interface DiamondFactory {
+    Root create();
+  }
+  
   @Test
   public void diamondTest() {
     Injector inj = Guice.createInjector(new AbstractModule() {
       @Override
       protected void configure() {
-        bindScope(DiamondScoped.class, DynamicScopes.get(DiamondScoped.class));
+        bindScope(DiamondScoped.class, DynamicScopes.scope(DiamondScoped.class));
+        bind(DiamondFactory.class).toProvider(DynamicScopes.factory(DiamondFactory.class, DiamondScoped.class));
       }
     });
     
-    Provider<Root> prov = inj.getProvider(Root.class);
+    DiamondFactory fact = inj.getInstance(DiamondFactory.class);
     
-    Root root1 = prov.get();
-    Root root2 = prov.get();
+    Root root1 = fact.create();
+    Root root2 = fact.create();
     
     assertTrue(root1.left.peak == root1.right.peak);
     

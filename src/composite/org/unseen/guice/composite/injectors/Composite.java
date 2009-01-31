@@ -1,4 +1,4 @@
-package org.unseen.guice.composite.factory;
+package org.unseen.guice.composite.injectors;
 
 import com.google.inject.Binder;
 import com.google.inject.Key;

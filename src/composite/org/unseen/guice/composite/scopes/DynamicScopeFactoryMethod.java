@@ -1,4 +1,4 @@
-package org.unseen.guice.composite.factory;
+package org.unseen.guice.composite.scopes;
 
 import static com.google.inject.internal.Annotations.getKey;
 
@@ -8,21 +8,16 @@ import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.List;
 
-import com.google.inject.AbstractModule;
-import com.google.inject.Binder;
-import com.google.inject.Binding;
 import com.google.inject.Injector;
 import com.google.inject.Key;
-import com.google.inject.Module;
 import com.google.inject.TypeLiteral;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
-import com.google.inject.util.Providers;
 
 /**
  * Implements a single factory method.
  */
-public class CompositeFactoryMethod {
+public class DynamicScopeFactoryMethod {
   /**
    * If a factory method parameter isn't annotated, it gets this annotation.
    */
@@ -51,17 +46,30 @@ public class CompositeFactoryMethod {
     }
   };
   
-  private final Method method;
+  /** The object created into the new dynamic context */
   private final Key<?> result;
+  /** The parameters passed into the new dynamic context */
   private final List<Key<?>> params;
+  /** The parent of the dyamic context this method will create */
+  private final DynamicContext parent;
+  /** The dynamic scope which this method creates */
+  private final Class<? extends Annotation> scope;
+  /** The Injector we use to create the first objects of the new DynamicContext */
+  private final Injector injector;
   
   /**
    * @param method
+   * @param scope
+   * @param injector
    * @param errors
    * @throws ErrorsException
    */
-  public CompositeFactoryMethod(Method method, Errors errors) throws ErrorsException {
-    this.method = method;
+  public DynamicScopeFactoryMethod(Method method, Class<? extends Annotation> scope,
+      DynamicContext parent, Injector injector, Errors errors) throws ErrorsException {
+    
+    this.parent = parent;
+    this.scope = scope;
+    this.injector = injector;
     
     this.result = getKey(
         TypeLiteral.get(method.getGenericReturnType()), method, method.getAnnotations(), errors);
@@ -73,38 +81,28 @@ public class CompositeFactoryMethod {
       paramArray[p] = paramKey(paramTypes[p], method, paramAnnotations[p], errors);
     }
     
-    /* The wrapped list is immutable */
     this.params = Arrays.asList(paramArray);
   }
   
   /**
-   * Create a new injector based at the parent, populate it with the
-   * parameters and the user definitions and return a binding to the class
-   * that the factory must produce.
-   * 
-   * @param parent
-   * @param composed
    * @param args
+   * @param parent
+   * @param injector
    * @return
    */
-  public Binding<?> invoke(Injector parent, final Iterable<Module> composed, final Object[] args) {
-    return parent.createChildInjector(new AbstractModule() {
-      @SuppressWarnings("unchecked")
-      protected void configure() {
-        Binder binder = binder().withSource(method);
-
-        /* Introduce the external parameters into the composition instance. */
-        int p = 0;
-        for (Key<?> paramKey : params) {
-          binder.bind((Key) paramKey).toProvider(Providers.of(args[p++]));
-        }
-
-        /* Add the content of the composition */
-        for (Module m : composed) {
-          install(m);
-        }
+  @SuppressWarnings("unchecked")
+  public Object invoke(Object[] args) {
+    DynamicContext active = DynamicContext.activate(scope, parent);
+    try {
+      int p = 0;
+      for (Key<?> paramKey : params) {
+        active.put((Key) paramKey, args[p++]);
       }
-    }).getBinding(result);
+      
+      return injector.getInstance(result);
+    } finally {
+      DynamicContext.deactivate();
+    }
   }
 
   /**
