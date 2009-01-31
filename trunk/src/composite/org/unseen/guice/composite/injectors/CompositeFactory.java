@@ -1,4 +1,4 @@
-package org.unseen.guice.composite.factory;
+package org.unseen.guice.composite.injectors;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
