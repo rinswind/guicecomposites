@@ -5,17 +5,22 @@ import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import static junit.framework.Assert.assertTrue;
+import static org.unseen.guice.composite.scopes.DynamicScopes.external;
 import static org.unseen.guice.composite.scopes.DynamicScopes.factory;
 import static org.unseen.guice.composite.scopes.DynamicScopes.scope;
+import static org.unseen.guice.composite.scopes.DynamicScopes.parameter;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
+import java.net.Socket;
 
 import org.junit.Test;
+import org.unseen.guice.composite.scopes.Parameter;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+import com.google.inject.Key;
 import com.google.inject.ScopeAnnotation;
 
 /**
@@ -46,14 +51,16 @@ public class NestingTest {
   }
   
   public interface Server {
-    Connection handleConnection();
+    Connection handleConnection(Socket sock);
   }
   
   public interface ConnectionFactory {
-    Connection create();
+    Connection create(Socket sock);
   }
   
   public interface Connection {
+    Socket socket();
+    
     Server server();
     
     Request handleRequest();
@@ -82,22 +89,28 @@ public class NestingTest {
       this.connections = connections;
     }
 
-    public Connection handleConnection() {
-      return connections.create();
+    public Connection handleConnection(Socket sock) {
+      return connections.create(sock);
     }
   }
   
   @ConnectionScoped
   public static class ConnectionImpl implements Connection {
+    private final Socket sock;
     private final Server server;
     private final RequestFactory requests;
     
     @Inject 
-    public ConnectionImpl(Server server, RequestFactory requests) {
+    public ConnectionImpl(@Parameter Socket sock, Server server, RequestFactory requests) {
+      this.sock = sock;
       this.server = server;
       this.requests = requests;
     }
 
+    public Socket socket() {
+      return sock;
+    }
+    
     public Server server() {
       return server;
     }
@@ -105,6 +118,7 @@ public class NestingTest {
     public Request handleRequest() {
       return requests.create();
     }
+
   }
   
   @RequestScoped
@@ -169,6 +183,12 @@ public class NestingTest {
         
         bind(Connection.class).to(ConnectionImpl.class);
         
+        /* Define an external object added into each connection space */
+        bind(Socket.class)
+        .annotatedWith(parameter(""))
+        .toProvider(external(Key.get(Socket.class, parameter(""))))
+        .in(ConnectionScoped.class);
+        
         /* The request factory lives in ConnectionScoped and creates RequestScoped */
         bind(RequestFactory.class)
         .toProvider(factory(RequestFactory.class, RequestScoped.class))
@@ -180,28 +200,22 @@ public class NestingTest {
     });
     
     ServerFactory fact = inj.getInstance(ServerFactory.class);
-    System.out.println("--------");
     
     Server serv = fact.create();
-    System.out.println("--------");
     
-    Connection conn1 = serv.handleConnection();
-    System.out.println("--------");
-    
-    Connection conn2 = serv.handleConnection();
-    System.out.println("--------");
-    
+    Connection conn1 = serv.handleConnection(new Socket());
     Request req11 = conn1.handleRequest();
-    System.out.println("--------");
-    
     Request req12 = conn1.handleRequest();
     
+    Connection conn2 = serv.handleConnection(new Socket());
     Request req21 = conn2.handleRequest();
     Request req22 = conn2.handleRequest();
 
     assertTrue(conn1.server() == conn2.server());
     
     assertTrue(conn1 != conn2);
+    
+    assertTrue(conn1.socket() != conn2.socket());
     
     assertTrue(req11 != req12);
     

@@ -54,7 +54,7 @@ public class DynamicContext {
    */
   @SuppressWarnings("unchecked")
   public <T, S extends Annotation> T search(Key<T> key, Provider<T> unscoped, Class<S> scope) {
-    System.out.println(this + ": search(" + scope.getSimpleName() + ", " + key.getTypeLiteral().getRawType().getSimpleName() + ")");
+    System.out.println(this + ": search(" + scope.getSimpleName() + ", " + key + ")");
     
     T val = null;
     
@@ -71,7 +71,6 @@ public class DynamicContext {
         } else {
           System.out.println(this + ": proxy detected " + key.getTypeLiteral().getRawType().getSimpleName());
         }
-        
       } else {
         System.out.println(this + ": found " + key.getTypeLiteral().getRawType().getSimpleName());
       }

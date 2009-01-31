@@ -18,34 +18,6 @@ import com.google.inject.internal.ErrorsException;
  * Implements a single factory method.
  */
 public class DynamicScopeFactoryMethod {
-  /**
-   * If a factory method parameter isn't annotated, it gets this annotation.
-   */
-  private static final Parameter DEFAULT_ANNOTATION = new Parameter() {
-    public String value() {
-      return "";
-    }
-
-    public Class<? extends Annotation> annotationType() {
-      return Parameter.class;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-      return o instanceof Parameter && ((Parameter) o).value().equals("");
-    }
-
-    @Override
-    public int hashCode() {
-      return 127 * "value".hashCode() ^ "".hashCode();
-    }
-
-    @Override
-    public String toString() {
-      return "@" + Parameter.class.getName() + "(value=)";
-    }
-  };
-  
   /** The object created into the new dynamic context */
   private final Key<?> result;
   /** The parameters passed into the new dynamic context */
@@ -96,6 +68,7 @@ public class DynamicScopeFactoryMethod {
     try {
       int p = 0;
       for (Key<?> paramKey : params) {
+        System.out.println("caching " + paramKey + "->" + args[p]);
         active.put((Key) paramKey, args[p++]);
       }
       
@@ -106,7 +79,7 @@ public class DynamicScopeFactoryMethod {
   }
 
   /**
-   * Returns a key similar to {@code key}, but with an {@literal @}Parameter
+   * Returns a key similar to {@code Key}, but with an {@literal @}Parameter
    * binding annotation. This fails if another binding annotation is clobbered
    * in the process. If the key already has the {@literal @}Parameter annotation,
    * it is returned as-is to preserve any String value.
@@ -119,7 +92,7 @@ public class DynamicScopeFactoryMethod {
     Class<? extends Annotation> annotation = key.getAnnotationType();
     
     if (annotation == null) {
-      return Key.get(key.getTypeLiteral(), DEFAULT_ANNOTATION);
+      return Key.get(key.getTypeLiteral(), DynamicScopes.parameter(""));
     }
 
     if (annotation == Parameter.class) {
