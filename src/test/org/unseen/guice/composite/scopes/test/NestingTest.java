@@ -5,10 +5,11 @@ import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import static junit.framework.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
 import static org.unseen.guice.composite.scopes.DynamicScopes.external;
 import static org.unseen.guice.composite.scopes.DynamicScopes.factory;
-import static org.unseen.guice.composite.scopes.DynamicScopes.scope;
 import static org.unseen.guice.composite.scopes.DynamicScopes.parameter;
+import static org.unseen.guice.composite.scopes.DynamicScopes.scope;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
@@ -67,7 +68,7 @@ public class NestingTest {
   }
   
   public interface RequestFactory {
-    Request create(@Parameter("header") String header);
+    Request create(@Parameter String header);
   }
   
   public interface Request {
@@ -129,7 +130,7 @@ public class NestingTest {
     private final Response resp;
     
     @Inject
-    public RequestImpl(@Parameter("header") String header, Connection conn, Response resp) {
+    public RequestImpl(@Parameter String header, Connection conn, Response resp) {
       this.header = header;
       this.conn = conn;
       this.resp = resp;
@@ -202,8 +203,8 @@ public class NestingTest {
         .in(ConnectionScoped.class);
         
         bind(String.class)
-        .annotatedWith(parameter("header"))
-        .toProvider(external(Key.get(String.class, parameter("header"))))
+        .annotatedWith(parameter(""))
+        .toProvider(external(Key.get(String.class, parameter(""))))
         .in(RequestScoped.class);
         
         bind(Request.class).to(RequestImpl.class);
@@ -231,21 +232,25 @@ public class NestingTest {
     
     assertTrue(req11 != req12);
     
+    assertEquals("req11", req11.header());
     assertTrue(req11.connection() == conn1);
     assertTrue(req11.response().connection() == conn1);
     /* Must use equals because Request<->Response form a loop */
     assertTrue(req11.response().request().equals(req11));
     
+    assertEquals("req12", req12.header());
     assertTrue(req12.connection() == conn1);
     assertTrue(req12.response().connection() == conn1);
     assertTrue(req12.response().request().equals(req12));
     
     assertTrue(req21 != req22);
     
+    assertEquals("req21", req21.header());
     assertTrue(req21.connection() == conn2);
     assertTrue(req21.response().connection() == conn2);
     assertTrue(req21.response().request().equals(req21));
  
+    assertEquals("req22", req22.header());
     assertTrue(req22.connection() == conn2);
     assertTrue(req22.response().connection() == conn2);
     assertTrue(req22.response().request().equals(req22));
