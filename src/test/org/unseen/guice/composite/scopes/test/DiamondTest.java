@@ -58,7 +58,7 @@ public class DiamondTest {
       @Override
       protected void configure() {
         DynamicScopes.bindScope(binder(), DiamondScoped.class);
-        bind(DiamondFactory.class).toProvider(DynamicScopes.factory(DiamondFactory.class, DiamondScoped.class));
+        DynamicScopes.bindFactory(binder(), DiamondFactory.class, DiamondScoped.class);
       }
     });
     

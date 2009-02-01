@@ -3,9 +3,6 @@ package org.unseen.guice.composite.scopes.test;
 import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
-import static org.unseen.guice.composite.scopes.DynamicScopes.external;
-import static org.unseen.guice.composite.scopes.DynamicScopes.factory;
-import static org.unseen.guice.composite.scopes.DynamicScopes.parameter;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
@@ -18,7 +15,6 @@ import com.google.inject.AbstractModule;
 import com.google.inject.CreationException;
 import com.google.inject.Guice;
 import com.google.inject.Inject;
-import com.google.inject.Key;
 import com.google.inject.ScopeAnnotation;
 
 public class ValidationTest {
@@ -38,7 +34,7 @@ public class ValidationTest {
   @TestScoped
   public static class Dependent {
     @Inject Dependency dep;
-    @Inject @Parameter("") String name;
+    @Inject @Parameter String name;
   }
   
   @TestScoped
@@ -52,25 +48,7 @@ public class ValidationTest {
       protected void configure() {
         DynamicScopes.bindScope(binder(), TestScoped.class);
         
-        bind(DependentFactory.class).toProvider(factory(DependentFactory.class, TestScoped.class));
-        
-        bind(String.class)
-        .annotatedWith(parameter(""))
-        .toProvider(external(Key.get(String.class, parameter(""))))
-        .in(TestScoped.class);
-      }
-    });
-  }
-  
-  @Test(expected = CreationException.class)
-  public void testMissingParameter() { 
-    Guice.createInjector(new AbstractModule() {
-      @Override
-      protected void configure() {
-        DynamicScopes.bindScope(binder(), TestScoped.class);
-        
-        bind(DependentFactory.class).toProvider(factory(DependentFactory.class, TestScoped.class));
-        bind(Dependency.class).to(DependencyImpl.class);
+        DynamicScopes.bindFactory(binder(), DependentFactory.class, TestScoped.class);
       }
     });
   }

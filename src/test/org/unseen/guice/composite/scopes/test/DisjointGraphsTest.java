@@ -1,5 +1,10 @@
 package org.unseen.guice.composite.scopes.test;
 
+import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.ElementType.TYPE;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import static junit.framework.Assert.assertTrue;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
@@ -11,13 +16,6 @@ import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.ScopeAnnotation;
-
-import static java.lang.annotation.RetentionPolicy.*;
-import static java.lang.annotation.ElementType.*;
-
-import static org.unseen.guice.composite.scopes.DynamicScopes.*;
-
-import static junit.framework.Assert.*;
 
 public class DisjointGraphsTest {
   @ScopeAnnotation
@@ -67,9 +65,9 @@ public class DisjointGraphsTest {
         DynamicScopes.bindScope(binder(), HorizontalScoped.class);
         DynamicScopes.bindScope(binder(), VerticalScoped.class);
         
-        bind(CenterFactory.class).toProvider(factory(CenterFactory.class, HorizontalScoped.class));
+        DynamicScopes.bindFactory(binder(), CenterFactory.class, HorizontalScoped.class);
         
-        bind(TopFactory.class).toProvider(factory(TopFactory.class, VerticalScoped.class)).in(HorizontalScoped.class);
+        DynamicScopes.bindFactory(binder(), TopFactory.class, VerticalScoped.class).in(HorizontalScoped.class);
       }
     });
     

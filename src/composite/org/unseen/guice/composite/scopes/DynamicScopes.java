@@ -3,9 +3,8 @@ package org.unseen.guice.composite.scopes;
 import java.lang.annotation.Annotation;
 
 import com.google.inject.Binder;
-import com.google.inject.Key;
-import com.google.inject.Provider;
 import com.google.inject.ScopeAnnotation;
+import com.google.inject.binder.ScopedBindingBuilder;
 
 public class DynamicScopes {
   private DynamicScopes() {
@@ -23,63 +22,14 @@ public class DynamicScopes {
 
   /**
    * @param <F>
-   * @param iface
-   * @param tag
-   * @return
-   */
-  public static <F> Provider<F> factory(Class<F> iface, Class<? extends Annotation> tag) {
-    checkScopeAnnotation(tag);
-    return new DynamicScopeFactoryProvider<F>(iface, tag);
-  }
-  
-  /**
-   * @param <F>
    * @param binder
    * @param iface
-   * @param tag
+   * @param target
    * @return
    */
-  public static <F> Provider<F> bindFactory(Binder binder, Class<F> iface, Class<? extends Annotation> tag) {
-    checkScopeAnnotation(tag);
-    return new DynamicScopeFactoryProvider<F>(iface, tag);
-  }
-  
-  /**
-   * @param <T>
-   * @param key
-   * @return
-   */
-  public static <T> Provider<T> external(Key<T> key) {
-    return new DynamicScopeParameterProvider<T>(key);
-  }
-  
-  /**
-   * @param value
-   * @return
-   */
-  public static Parameter parameter(final String value) {
-    return new Parameter() {
-      public String value() {
-        return value;
-      }
-
-      public Class<? extends Annotation> annotationType() {
-        return Parameter.class;
-      }
-      
-      public String toString() {
-        return "@" + Parameter.class.getName() + "(value=" + value + ")";
-      }
-      
-      public boolean equals(Object o) {
-        return o instanceof Parameter && value.equals(((Parameter) o).value());
-      }
-      
-      public int hashCode() {
-        return (127 * "value".hashCode()) ^ value.hashCode();
-      }
-
-    };
+  public static <F> ScopedBindingBuilder bindFactory(Binder binder, Class<F> iface, Class<? extends Annotation> target) {
+    checkScopeAnnotation(target);
+    return binder.bind(iface).toProvider(new DynamicScopeFactoryProvider<F>(iface, target, binder));
   }
   
   /**
