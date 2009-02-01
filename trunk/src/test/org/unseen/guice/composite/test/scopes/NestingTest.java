@@ -55,7 +55,7 @@ public class NestingTest {
   }
   
   public interface ConnectionFactory {
-    Connection create(Socket sock);
+    Connection create(@Parameter Socket sock);
   }
   
   public interface Connection {
@@ -63,14 +63,15 @@ public class NestingTest {
     
     Server server();
     
-    Request handleRequest();
+    Request handleRequest(String header);
   }
   
   public interface RequestFactory {
-    Request create();
+    Request create(@Parameter("header") String header);
   }
   
   public interface Request {
+    String header();
     Connection connection();
     Response response();
   }
@@ -115,23 +116,29 @@ public class NestingTest {
       return server;
     }
 
-    public Request handleRequest() {
-      return requests.create();
+    public Request handleRequest(String header) {
+      return requests.create(header);
     }
 
   }
   
   @RequestScoped
   public static class RequestImpl implements Request {
+    private final String header;
     private final Connection conn;
     private final Response resp;
     
     @Inject
-    public RequestImpl(Connection conn, Response resp) {
+    public RequestImpl(@Parameter("header") String header, Connection conn, Response resp) {
+      this.header = header;
       this.conn = conn;
       this.resp = resp;
     }
 
+    public String header() {
+      return header;
+    }
+    
     public Connection connection() {
       return conn;
     }
@@ -194,6 +201,11 @@ public class NestingTest {
         .toProvider(factory(RequestFactory.class, RequestScoped.class))
         .in(ConnectionScoped.class);
         
+        bind(String.class)
+        .annotatedWith(parameter("header"))
+        .toProvider(external(Key.get(String.class, parameter("header"))))
+        .in(RequestScoped.class);
+        
         bind(Request.class).to(RequestImpl.class);
         bind(Response.class).to(ResponseImpl.class);
       }
@@ -204,12 +216,12 @@ public class NestingTest {
     Server serv = fact.create();
     
     Connection conn1 = serv.handleConnection(new Socket());
-    Request req11 = conn1.handleRequest();
-    Request req12 = conn1.handleRequest();
+    Request req11 = conn1.handleRequest("req11");
+    Request req12 = conn1.handleRequest("req12");
     
     Connection conn2 = serv.handleConnection(new Socket());
-    Request req21 = conn2.handleRequest();
-    Request req22 = conn2.handleRequest();
+    Request req21 = conn2.handleRequest("req21");
+    Request req22 = conn2.handleRequest("req22");
 
     assertTrue(conn1.server() == conn2.server());
     
