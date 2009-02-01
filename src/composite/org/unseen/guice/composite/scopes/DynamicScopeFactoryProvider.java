@@ -20,7 +20,7 @@ import com.google.inject.spi.Message;
  * @author Todor Boev
  * @param <F>
  */
-public class DynamicScopeFactoryProvider<F, S extends Annotation> implements Provider<F> {
+public class DynamicScopeFactoryProvider<F> implements Provider<F> {
   private static final FactoryMethod EQUALS =  new FactoryMethod() {
     public Object invoke(Object proxy, FactoryInstance instance, Object[] args) throws Throwable {
       return args[0] == proxy || args[0] == instance;
@@ -54,7 +54,7 @@ public class DynamicScopeFactoryProvider<F, S extends Annotation> implements Pro
   private final Map<Method, FactoryMethod> methods;
   
   /** Part of the state loaded into every created factory */
-  private final Class<S> scope;
+  private final Class<? extends Annotation> scope;
   /** Part of the state loaded into every created factory - injected later */
   private Injector injector;
   
@@ -62,7 +62,7 @@ public class DynamicScopeFactoryProvider<F, S extends Annotation> implements Pro
    * @param iface interface of the factory
    * @param scope the scope of which this factory creates instances.
    */
-  public DynamicScopeFactoryProvider(Class<F> iface, Class<S> scope) {
+  public DynamicScopeFactoryProvider(Class<F> iface, Class<? extends Annotation> scope) {
     this.iface = iface;
     this.scope = scope;
     

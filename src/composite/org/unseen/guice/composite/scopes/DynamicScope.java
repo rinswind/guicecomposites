@@ -10,14 +10,14 @@ import com.google.inject.Scope;
  * @author Todor Boev
  * 
  */
-public class DynamicScope<S extends Annotation> implements Scope {
-  private final Class<S> tag;
+public class DynamicScope implements Scope {
+  private final Class<? extends Annotation> tag;
 
-  public DynamicScope(Class<S> tag) {
+  public DynamicScope(Class<? extends Annotation> tag) {
     this.tag = tag;
   }
 
-  public <T> Provider<T> scope(final Key<T> key, final Provider<T> unscoped) {
-    return new DynamicScopeProvider<T, S>(key, unscoped, tag);
+  public <T> Provider<T> scope(Key<T> key, Provider<T> unscoped) {
+    return new DynamicScopeProvider<T>(key, unscoped, tag);
   }
 }

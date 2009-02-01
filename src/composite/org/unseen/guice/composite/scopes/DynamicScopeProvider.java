@@ -10,12 +10,12 @@ import com.google.inject.Provider;
  *
  * @param <T>
  */
-public class DynamicScopeProvider<T, S extends Annotation> implements Provider<T> {
+public class DynamicScopeProvider<T> implements Provider<T> {
   private final Key<T> key;
   private final Provider<T> unscoped;
-  private final Class<S> scope;
+  private final Class<? extends Annotation> scope;
   
-  public DynamicScopeProvider(Key<T> key, Provider<T> unscoped, Class<S> scope) {
+  public DynamicScopeProvider(Key<T> key, Provider<T> unscoped, Class<? extends Annotation> scope) {
     this.key = key; 
     this.unscoped = unscoped;
     this.scope = scope;
