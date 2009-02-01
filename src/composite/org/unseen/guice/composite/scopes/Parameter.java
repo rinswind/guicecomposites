@@ -1,6 +1,7 @@
 package org.unseen.guice.composite.scopes;
 
 import static java.lang.annotation.ElementType.PARAMETER;
+import static java.lang.annotation.ElementType.FIELD;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 import java.lang.annotation.Retention;
@@ -13,7 +14,7 @@ import com.google.inject.BindingAnnotation;
  * to a factory method.
  */
 @BindingAnnotation
-@Target(PARAMETER)
+@Target({FIELD, PARAMETER})
 @Retention(RUNTIME)
 public @interface Parameter {
   String value() default "";

@@ -16,16 +16,17 @@ public class DynamicScopeInstance {
 
   private final Class<? extends Annotation> scope;
   private final DynamicScopeInstance parent;
-  private final Map<Key<?>, Object> cache = new HashMap<Key<?>, Object>();
+  private final Map<Key<?>, Object> cache;
   
   private DynamicScopeInstance(Class<? extends Annotation> scope, DynamicScopeInstance parent) {
     this.scope = scope;
     this.parent = parent;
+    this.cache = new HashMap<Key<?>, Object>();
   }
   
   @Override
   public String toString() {
-    return "DynamicContext[ " + scope.getSimpleName() + " ]";
+    return "DynamicScopeInstance[ " + scope.getSimpleName() + " ]";
   }
   
   /**
@@ -54,7 +55,7 @@ public class DynamicScopeInstance {
    */
   @SuppressWarnings("unchecked")
   public <T, S extends Annotation> T search(Key<T> key, Provider<T> unscoped, Class<S> scope) {
-    System.out.println(this + ": search(" + scope.getSimpleName() + ", " + key + ")");
+//    System.out.println(this + ": search(" + scope.getSimpleName() + ", " + key + ")");
     
     T val = null;
     
@@ -67,13 +68,15 @@ public class DynamicScopeInstance {
         /* In case of cycles a proxy to val has already been cached. So don't cache it */
         if (!cache.containsKey(key)) {
           cache.put(key, val);
-          System.out.println(this + ": created " + key.getTypeLiteral().getRawType().getSimpleName());
-        } else {
-          System.out.println(this + ": proxy detected " + key.getTypeLiteral().getRawType().getSimpleName());
-        }
-      } else {
-        System.out.println(this + ": found " + key.getTypeLiteral().getRawType().getSimpleName());
-      }
+//          System.out.println(this + ": created " + key.getTypeLiteral().getRawType().getSimpleName());
+        } 
+//        else {
+//          System.out.println(this + ": proxy detected " + key.getTypeLiteral().getRawType().getSimpleName());
+//        }
+      } 
+//      else {
+//        System.out.println(this + ": found " + key.getTypeLiteral().getRawType().getSimpleName());
+//      }
     }
     else if (parent != null) {
       val = parent.search(key, unscoped, scope);
@@ -93,10 +96,10 @@ public class DynamicScopeInstance {
    * @return
    */
   public static DynamicScopeInstance activate(Class<? extends Annotation> scope, DynamicScopeInstance parent) {
-    System.out.println("activate(" + scope.getSimpleName() + ", " + parent + ")");
+//    System.out.println("activate(" + scope.getSimpleName() + ", " + parent + ")");
     
     if (ACTIVE.get() != null) { 
-      throw new IllegalStateException("DynamicContext is already active in this thread: " + ACTIVE.get());
+      throw new IllegalStateException("A DynamicScopeInstance is already active in this thread: " + ACTIVE.get());
     }
     
     DynamicScopeInstance ctx = new DynamicScopeInstance(scope, parent);
@@ -118,7 +121,7 @@ public class DynamicScopeInstance {
    * Called at the end of a wave of object creation to clear the current context. 
    */
   public static void deactivate() {
-    System.out.println("deactivate()");
+//    System.out.println("deactivate()");
     ACTIVE.remove();
   }
 }

@@ -9,29 +9,13 @@ import com.google.inject.Injector;
 
 /**
  * @author Todor Boev
- *
- * @param <F>
  */
 public class FactoryInstance implements InvocationHandler {
-  private static final Method TO_STRING;
-  private static final Method EQUALS;
-  private static final Method HASH_CODE;
-  
-  static {
-    try {
-      TO_STRING = Object.class.getDeclaredMethod("toString");
-      EQUALS = Object.class.getDeclaredMethod("equals", Object.class);
-      HASH_CODE = Object.class.getDeclaredMethod("hashCode");
-    } catch (Exception exc) {
-      throw new RuntimeException(exc);
-    }
-  }
-  
-  /*
-   * State
-   */
+  /** Scope to create */
   private final Class<? extends Annotation> scope;
+  /** Context at which to base the new scope */
   private final DynamicScopeInstance context;
+  /** Injector to crete the objects in to the new scope*/
   private final Injector injector;
   
   /** Method suite */
@@ -56,34 +40,18 @@ public class FactoryInstance implements InvocationHandler {
     return scope;
   }
   
-  public Injector injector() {
-    return injector;
-  }
-  
   public DynamicScopeInstance context() { 
     return context; 
+  }
+  
+  public Injector injector() {
+    return injector;
   }
   
   /**
    * @see java.lang.reflect.InvocationHandler#invoke(java.lang.Object, java.lang.reflect.Method, java.lang.Object[])
    */
   public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-    /* equals() */
-    if (method == EQUALS) {
-      return args[0] == this || args[0] == proxy;
-    }
-    
-    /* toString() */
-    if (method == TO_STRING) {
-      return proxy.getClass().getInterfaces()[0].getName();
-    }
-    
-    /* hashCode() */
-    if (method == HASH_CODE) {
-      return this.hashCode();
-    }
-    
-    /* Factory method - delegate to a specialized hander */
-    return methods.get(method).invoke(this, args);
+    return methods.get(method).invoke(proxy, this, args);
   }
 }
