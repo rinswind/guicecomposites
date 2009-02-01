@@ -19,10 +19,28 @@ import com.google.inject.internal.ErrorsException;
  * @param <F>
  */
 public class DynamicScopeFactory<F> implements InvocationHandler {
+  private static final Method TO_STRING;
+  private static final Method EQUALS;
+  private static final Method HASH_CODE;
+  
+  static {
+    try {
+      TO_STRING = Object.class.getDeclaredMethod("toString");
+      EQUALS = Object.class.getDeclaredMethod("equals", Object.class);
+      HASH_CODE = Object.class.getDeclaredMethod("hashCode");
+    } catch (Exception exc) {
+      throw new RuntimeException(exc);
+    }
+  }
+  
   /** Dynamic proxy that can be called to create a new dynamic context */
   private final F proxy;
   /** Methods used to create the new contexts */
   private final Map<Method, DynamicScopeFactoryMethod> methods; 
+  
+  private final Class<? extends Annotation> scope;
+  private final DynamicContext parent;
+  private final Injector injector;
   
   /**
    * @param <F>
@@ -39,13 +57,17 @@ public class DynamicScopeFactory<F> implements InvocationHandler {
    * @param iface
    */
   private DynamicScopeFactory(Class<F> iface, Class<? extends Annotation> scope, DynamicContext parent, Injector injector) {
+    this.scope = scope;
+    this.parent = parent;
+    this.injector = injector;
+    
     Errors errors = new Errors();
     try {
       this.methods = new HashMap<Method, DynamicScopeFactoryMethod>();
       
       /* TODO Also grab methods from superinterfaces */
       for (Method method : iface.getMethods()) {
-        methods.put(method, new DynamicScopeFactoryMethod(method, scope, parent, injector, errors));
+        methods.put(method, new DynamicScopeFactoryMethod(method, errors));
       }
     } catch (ErrorsException e) {
       throw new ConfigurationException(e.getErrors().getMessages());
@@ -73,14 +95,24 @@ public class DynamicScopeFactory<F> implements InvocationHandler {
    * @see java.lang.reflect.InvocationHandler#invoke(java.lang.Object, java.lang.reflect.Method, java.lang.Object[])
    */
   public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-    /* Delegate equals, toString, hashCode to this factory */
-    if (method.getDeclaringClass() == Object.class) {
-      return method.invoke(this, args);
+    /* equals() */
+    if (method == EQUALS) {
+      return args[0] == this || args[0] == proxy;
     }
     
-    /* For the factory methods use method handler */
+    /* toString() */
+    if (method == TO_STRING) {
+      return proxy.getClass().getInterfaces()[0].getName();
+    }
+    
+    /* hashCode() */
+    if (method == HASH_CODE) {
+      return this.hashCode();
+    }
+    
+    /* Factory method - delegate to a specialized hander */
     try {
-      return methods.get(method).invoke(args);
+      return methods.get(method).invoke(scope, parent, injector, args);
     } catch (ProvisionException e) {
       /* If this is an exception declared by the factory method, throw it as-is */
       if (e.getErrorMessages().size() == 1) {
@@ -91,16 +123,6 @@ public class DynamicScopeFactory<F> implements InvocationHandler {
       }
       throw e;
     }
-  }
-  
-  @Override
-  public String toString() {
-    return proxy.getClass().getInterfaces()[0].getName();
-  }
-  
-  @Override
-  public boolean equals(Object o) {
-    return o == this || o == proxy;
   }
   
   /**
