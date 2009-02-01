@@ -16,21 +16,32 @@ public class DynamicScopes {
    * @param binder
    * @param tag
    */
-  public static <S extends Annotation> void bindScope(Binder binder, Class<S> tag) {
+  public static void bindScope(Binder binder, Class<? extends Annotation> tag) {
     checkScopeAnnotation(tag);
-    binder.bindScope(tag, new DynamicScope<S>(tag));
+    binder.bindScope(tag, new DynamicScope(tag));
   }
 
   /**
    * @param <F>
-   * @param <S>
    * @param iface
    * @param tag
    * @return
    */
-  public static <F, S extends Annotation> Provider<F> factory(Class<F> iface, Class<S> tag) {
+  public static <F> Provider<F> factory(Class<F> iface, Class<? extends Annotation> tag) {
     checkScopeAnnotation(tag);
-    return new DynamicScopeFactoryProvider<F, S>(iface, tag);
+    return new DynamicScopeFactoryProvider<F>(iface, tag);
+  }
+  
+  /**
+   * @param <F>
+   * @param binder
+   * @param iface
+   * @param tag
+   * @return
+   */
+  public static <F> Provider<F> bindFactory(Binder binder, Class<F> iface, Class<? extends Annotation> tag) {
+    checkScopeAnnotation(tag);
+    return new DynamicScopeFactoryProvider<F>(iface, tag);
   }
   
   /**
