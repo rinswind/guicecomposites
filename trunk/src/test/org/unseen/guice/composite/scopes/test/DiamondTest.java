@@ -1,4 +1,4 @@
-package org.unseen.guice.composite.test.scopes;
+package org.unseen.guice.composite.scopes.test;
 
 import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.ElementType.TYPE;
