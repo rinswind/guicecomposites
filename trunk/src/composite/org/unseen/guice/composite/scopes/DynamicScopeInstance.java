@@ -11,14 +11,14 @@ import com.google.inject.Provider;
  * @author Todor Boev
  *
  */
-public class DynamicContext {
-  private static final ThreadLocal<DynamicContext> ACTIVE = new ThreadLocal<DynamicContext>();
+public class DynamicScopeInstance {
+  private static final ThreadLocal<DynamicScopeInstance> ACTIVE = new ThreadLocal<DynamicScopeInstance>();
 
   private final Class<? extends Annotation> scope;
-  private final DynamicContext parent;
+  private final DynamicScopeInstance parent;
   private final Map<Key<?>, Object> cache = new HashMap<Key<?>, Object>();
   
-  private DynamicContext(Class<? extends Annotation> scope, DynamicContext parent) {
+  private DynamicScopeInstance(Class<? extends Annotation> scope, DynamicScopeInstance parent) {
     this.scope = scope;
     this.parent = parent;
   }
@@ -92,14 +92,14 @@ public class DynamicContext {
    * @param parent
    * @return
    */
-  public static DynamicContext activate(Class<? extends Annotation> scope, DynamicContext parent) {
+  public static DynamicScopeInstance activate(Class<? extends Annotation> scope, DynamicScopeInstance parent) {
     System.out.println("activate(" + scope.getSimpleName() + ", " + parent + ")");
     
     if (ACTIVE.get() != null) { 
       throw new IllegalStateException("DynamicContext is already active in this thread: " + ACTIVE.get());
     }
     
-    DynamicContext ctx = new DynamicContext(scope, parent);
+    DynamicScopeInstance ctx = new DynamicScopeInstance(scope, parent);
     ACTIVE.set(ctx);
     return ctx;
   }
@@ -110,7 +110,7 @@ public class DynamicContext {
    * 
    * @return
    */
-  public static DynamicContext active() {
+  public static DynamicScopeInstance active() {
     return ACTIVE.get();
   }
   
@@ -121,35 +121,4 @@ public class DynamicContext {
     System.out.println("deactivate()");
     ACTIVE.remove();
   }
-  
-//  /**
-//   * Drives a "wave of creation" starting from one unscoped provider and key.
-//   * 
-//   * @paramw <T>
-//   * @param key: What object are we looking for.
-//   * @param unscoped: A provider to use if an instance needs to be lazily created
-//   *        and cached.
-//   * @param scope: In case the current cache is not set this is used to create a
-//   *        new scope. Otherwise it is used to find the appropriate cache level
-//   *        to look for instances and store a lazily created instance.
-//   * @param parent: In case the current cache is not set this is used as a basis
-//   *        for a newly created cache.
-//   * @return
-//   */
-//  public static <T, S extends Annotation> T lookup(Key<T> key, Provider<T> unscoped, Class<S> scope) {
-//    DynamicContext ctx = ACTIVE.get();
-//    boolean owner = ctx == null;
-//    if (ctx == null) {
-//      ctx = new DynamicContext(scope, PARENT.get());
-//      ACTIVE.set(ctx);
-//    }
-//    
-//    try {
-//      return ctx.search(key, unscoped, scope);
-//    } finally {
-//      if (owner) {
-//        ACTIVE.remove();
-//      }
-//    }
-//  }
 }

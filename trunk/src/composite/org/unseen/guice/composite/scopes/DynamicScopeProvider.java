@@ -29,7 +29,7 @@ public class DynamicScopeProvider<T, S extends Annotation> implements Provider<T
   public T get() {
     System.out.println(this + ".get()");
     
-    DynamicContext active = DynamicContext.active();
+    DynamicScopeInstance active = DynamicScopeInstance.active();
     if (active == null) {
       throw new IllegalStateException();
     }
