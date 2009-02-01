@@ -120,7 +120,6 @@ public class NestingTest {
     public Request handleRequest(String header) {
       return requests.create(header);
     }
-
   }
   
   @RequestScoped
@@ -191,7 +190,7 @@ public class NestingTest {
         
         bind(Connection.class).to(ConnectionImpl.class);
         
-        /* Define an external object added into each connection space */
+        /* Define an external Socket object added into each ConnectionScoped space */
         bind(Socket.class)
         .annotatedWith(parameter(""))
         .toProvider(external(Key.get(Socket.class, parameter(""))))
@@ -202,6 +201,7 @@ public class NestingTest {
         .toProvider(factory(RequestFactory.class, RequestScoped.class))
         .in(ConnectionScoped.class);
         
+        /* Define an external String object added into each RequestScoped space */
         bind(String.class)
         .annotatedWith(parameter(""))
         .toProvider(external(Key.get(String.class, parameter(""))))

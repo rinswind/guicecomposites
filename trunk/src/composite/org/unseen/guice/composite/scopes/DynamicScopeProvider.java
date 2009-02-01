@@ -23,11 +23,11 @@ public class DynamicScopeProvider<T, S extends Annotation> implements Provider<T
   
   @Override
   public String toString() {
-    return "DynamicScopeProvider[ scope: " + scope.getSimpleName() + ", key: " + key.getTypeLiteral().getRawType().getSimpleName() + "]";
+    return "DynamicScopeProvider[ scope: " + scope.getSimpleName() + ", key: " + key + "]";
   }
   
   public T get() {
-    System.out.println(this + ".get()");
+//    System.out.println(this + ".get()");
     
     DynamicScopeInstance active = DynamicScopeInstance.active();
     if (active == null) {
@@ -37,10 +37,9 @@ public class DynamicScopeProvider<T, S extends Annotation> implements Provider<T
     /*
      * TODO Make sure the scope of the current provider is always equal or wider
      * than the active scope. Wider because a part of the parent scope might be
-     * lazily created because of demand of the first narrower scope it owns.
-     * This will require me to introduce scope ordering.
+     * lazily created because of demand by a narrower scope. This will require
+     * me to introduce explicit scope ordering.
      */
-    
     return active.search(key, unscoped, scope);
   }
 }
