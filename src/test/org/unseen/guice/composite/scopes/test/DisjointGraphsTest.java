@@ -1,4 +1,4 @@
-package org.unseen.guice.composite.test.scopes;
+package org.unseen.guice.composite.scopes.test;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;

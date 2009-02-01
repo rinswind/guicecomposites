@@ -1,4 +1,4 @@
-package org.unseen.guice.composite.test.injectors;
+package org.unseen.guice.composite.injectors.test;
 
 import static org.junit.Assert.*;
 
