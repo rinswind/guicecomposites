@@ -6,9 +6,6 @@ import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import static junit.framework.Assert.assertTrue;
 import static org.junit.Assert.assertEquals;
-import static org.unseen.guice.composite.scopes.DynamicScopes.external;
-import static org.unseen.guice.composite.scopes.DynamicScopes.factory;
-import static org.unseen.guice.composite.scopes.DynamicScopes.parameter;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
@@ -21,12 +18,10 @@ import org.unseen.guice.composite.scopes.Parameter;
 import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
-import com.google.inject.Key;
 import com.google.inject.ScopeAnnotation;
 
 /**
  * @author Todor Boev
- *
  */
 public class NestingTest {
   @ScopeAnnotation
@@ -56,7 +51,7 @@ public class NestingTest {
   }
   
   public interface ConnectionFactory {
-    Connection create(@Parameter Socket sock);
+    Connection create(Socket sock);
   }
   
   public interface Connection {
@@ -68,7 +63,7 @@ public class NestingTest {
   }
   
   public interface RequestFactory {
-    Request create(@Parameter String header);
+    Request create(String header);
   }
   
   public interface Request {
@@ -178,32 +173,17 @@ public class NestingTest {
         DynamicScopes.bindScope(binder(), RequestScoped.class);
         
         /* The ServerFactory lives in no scope and creates ServerScoped */
-        bind(ServerFactory.class)
-        .toProvider(factory(ServerFactory.class, ServerScoped.class));
+        DynamicScopes.bindFactory(binder(), ServerFactory.class, ServerScoped.class);
         
         bind(Server.class).to(ServerImpl.class);
         
         /* The ConnectionFactory lives in ServerScoped but creates ConnectionScoped */
-        bind(ConnectionFactory.class)
-        .toProvider(factory(ConnectionFactory.class, ConnectionScoped.class))
-        .in(ServerScoped.class);
-        /* Define an external Socket object added into each ConnectionScoped space */
-        bind(Socket.class)
-        .annotatedWith(parameter(""))
-        .toProvider(external(Key.get(Socket.class, parameter(""))))
-        .in(ConnectionScoped.class);
+        DynamicScopes.bindFactory(binder(), ConnectionFactory.class, ConnectionScoped.class).in(ServerScoped.class);
         
         bind(Connection.class).to(ConnectionImpl.class);
         
         /* The request factory lives in ConnectionScoped and creates RequestScoped */
-        bind(RequestFactory.class)
-        .toProvider(factory(RequestFactory.class, RequestScoped.class))
-        .in(ConnectionScoped.class);
-        /* Define an external String object added into each RequestScoped space */
-        bind(String.class)
-        .annotatedWith(parameter(""))
-        .toProvider(external(Key.get(String.class, parameter(""))))
-        .in(RequestScoped.class);
+        DynamicScopes.bindFactory(binder(), RequestFactory.class, RequestScoped.class).in(ConnectionScoped.class);
         
         bind(Request.class).to(RequestImpl.class);
         bind(Response.class).to(ResponseImpl.class);

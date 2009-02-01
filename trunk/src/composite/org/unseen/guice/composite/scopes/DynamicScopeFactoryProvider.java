@@ -8,12 +8,14 @@ import java.lang.reflect.Proxy;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.google.inject.Binder;
 import com.google.inject.ConfigurationException;
 import com.google.inject.CreationException;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Provider;
 import com.google.inject.internal.Errors;
+import com.google.inject.internal.ErrorsException;
 import com.google.inject.spi.Message;
 
 /**
@@ -61,8 +63,10 @@ public class DynamicScopeFactoryProvider<F> implements Provider<F> {
   /**
    * @param iface interface of the factory
    * @param scope the scope of which this factory creates instances.
+   * @param binder
+   * @throws ErrorsException 
    */
-  public DynamicScopeFactoryProvider(Class<F> iface, Class<? extends Annotation> scope) {
+  public DynamicScopeFactoryProvider(Class<F> iface, Class<? extends Annotation> scope, Binder binder) {
     this.iface = iface;
     this.scope = scope;
     
@@ -72,7 +76,7 @@ public class DynamicScopeFactoryProvider<F> implements Provider<F> {
       
       /* TODO Also grab methods from superinterfaces */
       for (Method method : iface.getMethods()) {
-        methods.put(method, new FactoryMethodImpl(method));
+        methods.put(method, new FactoryMethodImpl(method, scope, binder));
       }
       
       /*

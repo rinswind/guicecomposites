@@ -8,6 +8,7 @@ import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.List;
 
+import com.google.inject.Binder;
 import com.google.inject.ConfigurationException;
 import com.google.inject.CreationException;
 import com.google.inject.Injector;
@@ -21,20 +22,70 @@ import com.google.inject.internal.ErrorsException;
  * Implements a single factory method.
  */
 public class FactoryMethodImpl implements FactoryMethod {
+  private static final Parameter DEFAULT_TAG = new Parameter() {
+    public String value() {
+      return "";
+    }
+
+    public Class<? extends Annotation> annotationType() {
+      return Parameter.class;
+    }
+    
+    public String toString() {
+      return "@" + Parameter.class.getName() + "(value=)";
+    }
+    
+    public boolean equals(Object o) {
+      return o instanceof Parameter && "".equals(((Parameter) o).value());
+    }
+    
+    public int hashCode() {
+      return (127 * "value".hashCode()) ^ "".hashCode();
+    }
+  };
+
   /** The method this handler implements */
   private final Method method;
   /** The object created into the new dynamic context */
-  private Key<?> result;
+  private final Key<?> result;
   /** The parameters passed into the new dynamic context */
-  private List<Key<?>> params;
+  private final List<Key<?>> params;
   
   /**
    * @param method
+   * @param binder
    * @param errors
-   * @throws ErrorsException
+   * @throws ErrorsException 
    */
-  public FactoryMethodImpl(Method method) {
+  @SuppressWarnings("unchecked")
+  public FactoryMethodImpl(Method method, Class<? extends Annotation> scope, Binder binder) {
+    
     this.method = method;
+    
+    Errors errors = new Errors();    
+    try {
+      /* Build this methods return type */
+      this.result = getKey(
+          TypeLiteral.get(method.getGenericReturnType()), method, method.getAnnotations(), errors);
+      
+      /* Build this methods arguments */
+      Type[] paramTypes = method.getGenericParameterTypes();
+      Annotation[][] paramAnnotations = method.getParameterAnnotations();
+      Key<?>[] paramArray = new Key<?>[paramTypes.length];
+      for (int p = 0; p < paramArray.length; p++) {
+        Key paramKey = paramKey(paramTypes[p], method, paramAnnotations[p], errors);
+        
+        paramArray[p] = paramKey;  
+        
+        binder.bind(paramKey).toProvider(new DynamicScopeParameterProvider(paramKey)).in(scope);
+      }
+    
+      this.params = Arrays.asList(paramArray);
+      
+      errors.throwConfigurationExceptionIfErrorsExist();
+    } catch (ErrorsException e) {
+      throw new ConfigurationException(errors.getMessages());
+    }
   }
   
   /**
@@ -74,24 +125,7 @@ public class FactoryMethodImpl implements FactoryMethod {
    */
   public void validate(Injector injector, Errors errors) {
     try {
-      /* Build this methods return type */
-      this.result = getKey(
-          TypeLiteral.get(method.getGenericReturnType()), method, method.getAnnotations(), errors);
-      
-      /* Build this methods arguments */
-      Type[] paramTypes = method.getGenericParameterTypes();
-      Annotation[][] paramAnnotations = method.getParameterAnnotations();
-      Key<?>[] paramArray = new Key<?>[paramTypes.length];
-      for (int p = 0; p < paramArray.length; p++) {
-        paramArray[p] = paramKey(paramTypes[p], method, paramAnnotations[p], errors);
-      }
-      
-      this.params = Arrays.asList(paramArray);
-      
-      /* Ask the injector to check if it can build our result type */
       injector.getBinding(result);
-    } catch (ErrorsException e) {
-      errors.merge(e.getErrors());
     } catch (ConfigurationException e) {
       errors.merge(e.getErrorMessages());
     } catch (CreationException e) {
@@ -113,7 +147,7 @@ public class FactoryMethodImpl implements FactoryMethod {
     Class<? extends Annotation> annotation = key.getAnnotationType();
     
     if (annotation == null) {
-      return Key.get(key.getTypeLiteral(), DynamicScopes.parameter(""));
+      return Key.get(key.getTypeLiteral(), DEFAULT_TAG);
     }
 
     if (annotation == Parameter.class) {
