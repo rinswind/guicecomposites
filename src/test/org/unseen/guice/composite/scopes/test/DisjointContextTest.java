@@ -17,7 +17,7 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.ScopeAnnotation;
 
-public class DisjointGraphsTest {
+public class DisjointContextTest {
   @ScopeAnnotation
   @Retention(RUNTIME)
   @Target({TYPE, METHOD})
