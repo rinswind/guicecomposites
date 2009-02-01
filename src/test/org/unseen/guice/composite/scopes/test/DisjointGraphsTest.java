@@ -4,6 +4,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 import org.junit.Test;
+import org.unseen.guice.composite.scopes.DynamicScopes;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
@@ -63,8 +64,8 @@ public class DisjointGraphsTest {
     Injector inj = Guice.createInjector(new AbstractModule() {
       @Override
       protected void configure() {
-        bindScope(HorizontalScoped.class, scope(HorizontalScoped.class));
-        bindScope(VerticalScoped.class, scope(VerticalScoped.class));
+        DynamicScopes.bindScope(binder(), HorizontalScoped.class);
+        DynamicScopes.bindScope(binder(), VerticalScoped.class);
         
         bind(CenterFactory.class).toProvider(factory(CenterFactory.class, HorizontalScoped.class));
         

@@ -42,7 +42,6 @@ public class FactoryMethodImpl implements FactoryMethod {
    */
   @SuppressWarnings("unchecked")
   public Object invoke(Object proxy, FactoryInstance instance,Object[] args) throws Throwable {
-    /* Spawn a new scope */
     DynamicScopeInstance active = DynamicScopeInstance.activate(instance.scope(), instance.context());
     try {
       int p = 0;
@@ -50,6 +49,10 @@ public class FactoryMethodImpl implements FactoryMethod {
         active.put((Key) paramKey, args[p++]);
       }
       
+      /*
+       * If scope factories need to be created to satisfy this instantiation
+       * they will capture the scope instance we have activated just now.
+       */
       return instance.injector().getInstance(result);
     } catch (ProvisionException e) {
       /* If this is an exception declared by the factory method, throw it as-is */

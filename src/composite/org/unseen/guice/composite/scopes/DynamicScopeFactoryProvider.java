@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.google.inject.ConfigurationException;
+import com.google.inject.CreationException;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Provider;
@@ -92,8 +93,7 @@ public class DynamicScopeFactoryProvider<F, S extends Annotation> implements Pro
   @Inject
   public void setInjector(Injector injector) {
     if (this.injector != null) {
-      throw new ConfigurationException(asList(new Message(
-          DynamicScopeFactoryProvider.class,
+      throw new ConfigurationException(asList(new Message(DynamicScopeFactoryProvider.class,
           "DynamicScopeFactoryProviders can only be used in one Injector.")));
     }
     
@@ -111,25 +111,31 @@ public class DynamicScopeFactoryProvider<F, S extends Annotation> implements Pro
    */
   public F get() {
     if (injector == null) {
-      throw new IllegalStateException("DynamicScopeFactoryProvider is not initalized with an Injector");
+      throw new CreationException(asList(new Message(DynamicScopeFactoryProvider.class,
+          "DynamicScopeFactoryProvider is not initalized with an Injector")));
     }
     
     /* Capture the current scope if any - this is the last part of the instance state */
-    DynamicScopeInstance active = DynamicScopeInstance.active();
+    DynamicScopeInstance active = DynamicScopeInstance.isActive() ? DynamicScopeInstance.active() : null;
     
-    /* Return a factory that will continue the scope creation later on */
+    /*
+     * Return a factory that will continue the creation starting from the scope
+     * that is active right now.
+     */
     FactoryInstance factory = new FactoryInstance(scope, active, injector, methods);
-    
+
     /*
      * FIX Can cause trouble under OSGi. The problem here is that the factory
      * interface class loader is different from the class loader of the internal
      * classes we use to support the proxy. We need a class loader bridge that
      * will delegate the loading of our internal classes to our loader and
-     * everything else to the loader of the factory interface. To make this work
-     * under OSGi we must hot have internal unexported classes that support the
-     * proxy. The easiest way it so have everything in one public package so
-     * that the consumers import the impl classes together with the public
-     * interface. This of course is bad OSGi practice.
+     * everything else to the loader of the factory interface.
+     * 
+     * With no bridge to make this work under OSGi we must not have internal
+     * unexported classes that support the proxy. The easiest way it so have
+     * everything in one public package so that the consumers import the impl
+     * classes together with the public interface. This of course is bad OSGi
+     * practice.
      */
     return iface.cast(Proxy.newProxyInstance(iface.getClassLoader(), new Class[] {iface}, factory));
   }

@@ -9,13 +9,13 @@ import static org.junit.Assert.assertEquals;
 import static org.unseen.guice.composite.scopes.DynamicScopes.external;
 import static org.unseen.guice.composite.scopes.DynamicScopes.factory;
 import static org.unseen.guice.composite.scopes.DynamicScopes.parameter;
-import static org.unseen.guice.composite.scopes.DynamicScopes.scope;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 import java.net.Socket;
 
 import org.junit.Test;
+import org.unseen.guice.composite.scopes.DynamicScopes;
 import org.unseen.guice.composite.scopes.Parameter;
 
 import com.google.inject.AbstractModule;
@@ -173,9 +173,9 @@ public class NestingTest {
     Injector inj = createInjector(new AbstractModule() {
       @Override
       protected void configure() {
-        bindScope(ServerScoped.class, scope(ServerScoped.class));
-        bindScope(ConnectionScoped.class, scope(ConnectionScoped.class));
-        bindScope(RequestScoped.class, scope(RequestScoped.class));
+        DynamicScopes.bindScope(binder(), ServerScoped.class);
+        DynamicScopes.bindScope(binder(), ConnectionScoped.class);
+        DynamicScopes.bindScope(binder(), RequestScoped.class);
         
         /* The ServerFactory lives in no scope and creates ServerScoped */
         bind(ServerFactory.class)
@@ -187,20 +187,18 @@ public class NestingTest {
         bind(ConnectionFactory.class)
         .toProvider(factory(ConnectionFactory.class, ConnectionScoped.class))
         .in(ServerScoped.class);
-        
-        bind(Connection.class).to(ConnectionImpl.class);
-        
         /* Define an external Socket object added into each ConnectionScoped space */
         bind(Socket.class)
         .annotatedWith(parameter(""))
         .toProvider(external(Key.get(Socket.class, parameter(""))))
         .in(ConnectionScoped.class);
         
+        bind(Connection.class).to(ConnectionImpl.class);
+        
         /* The request factory lives in ConnectionScoped and creates RequestScoped */
         bind(RequestFactory.class)
         .toProvider(factory(RequestFactory.class, RequestScoped.class))
         .in(ConnectionScoped.class);
-        
         /* Define an external String object added into each RequestScoped space */
         bind(String.class)
         .annotatedWith(parameter(""))

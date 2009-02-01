@@ -57,7 +57,7 @@ public class DiamondTest {
     Injector inj = Guice.createInjector(new AbstractModule() {
       @Override
       protected void configure() {
-        bindScope(DiamondScoped.class, DynamicScopes.scope(DiamondScoped.class));
+        DynamicScopes.bindScope(binder(), DiamondScoped.class);
         bind(DiamondFactory.class).toProvider(DynamicScopes.factory(DiamondFactory.class, DiamondScoped.class));
       }
     });

@@ -1,11 +1,16 @@
 package org.unseen.guice.composite.scopes;
 
+import static java.util.Arrays.asList;
+
 import java.lang.annotation.Annotation;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.google.inject.CreationException;
 import com.google.inject.Key;
 import com.google.inject.Provider;
+import com.google.inject.spi.Message;
 
 /**
  * @author Todor Boev
@@ -38,7 +43,8 @@ public class DynamicScopeInstance {
    */
   public <T> void put(Key<T> key, T val) {
     if (cache.containsKey(key)) {
-      throw new IllegalArgumentException(this + ": " + key + " already cached");
+      throw new CreationException(Arrays.asList(new Message(key
+          + " already ached in scope instance " + scope)));
     }
     cache.put(key, val);
   }
@@ -55,8 +61,6 @@ public class DynamicScopeInstance {
    */
   @SuppressWarnings("unchecked")
   public <T, S extends Annotation> T search(Key<T> key, Provider<T> unscoped, Class<S> scope) {
-//    System.out.println(this + ": search(" + scope.getSimpleName() + ", " + key + ")");
-    
     T val = null;
     
     if (this.scope == scope) {
@@ -65,24 +69,19 @@ public class DynamicScopeInstance {
       if (val == null) { 
         val = unscoped.get();
         
-        /* In case of cycles a proxy to val has already been cached. So don't cache it */
-        if (!cache.containsKey(key)) {
-          cache.put(key, val);
-//          System.out.println(this + ": created " + key.getTypeLiteral().getRawType().getSimpleName());
-        } 
-//        else {
-//          System.out.println(this + ": proxy detected " + key.getTypeLiteral().getRawType().getSimpleName());
-//        }
+        /*
+         * In case of cycles a proxy to val has already been cached. So we sould
+         * override the proxy with itself - no harm done.
+         */
+        cache.put(key, val);
       } 
-//      else {
-//        System.out.println(this + ": found " + key.getTypeLiteral().getRawType().getSimpleName());
-//      }
     }
     else if (parent != null) {
       val = parent.search(key, unscoped, scope);
     } 
     else {
-      throw new RuntimeException("No cache level found for " + key + " scoped as " + scope);
+      throw new CreationException(asList(new Message("No cache level found for " + key
+          + " scoped as " + scope + " and searched in " + this.scope + " and it's parents")));
     }
 
     return val;
@@ -96,15 +95,21 @@ public class DynamicScopeInstance {
    * @return
    */
   public static DynamicScopeInstance activate(Class<? extends Annotation> scope, DynamicScopeInstance parent) {
-//    System.out.println("activate(" + scope.getSimpleName() + ", " + parent + ")");
-    
-    if (ACTIVE.get() != null) { 
-      throw new IllegalStateException("A DynamicScopeInstance is already active in this thread: " + ACTIVE.get());
+    if (ACTIVE.get() != null) {
+      throw new CreationException(Arrays.asList(new Message(
+          "A DynamicScopeInstance is already active in this thread: " + ACTIVE.get())));
     }
     
     DynamicScopeInstance ctx = new DynamicScopeInstance(scope, parent);
     ACTIVE.set(ctx);
     return ctx;
+  }
+  
+  /**
+   * @return
+   */
+  public static boolean isActive() {
+    return ACTIVE.get() != null;
   }
   
   /**
@@ -114,14 +119,18 @@ public class DynamicScopeInstance {
    * @return
    */
   public static DynamicScopeInstance active() {
-    return ACTIVE.get();
+    DynamicScopeInstance active = ACTIVE.get();
+    if (active == null) {
+      throw new CreationException(Arrays.asList(new Message(
+          "No dynamic scope instance is active in this thread")));
+    }
+    return active;
   }
   
   /**
    * Called at the end of a wave of object creation to clear the current context. 
    */
   public static void deactivate() {
-//    System.out.println("deactivate()");
     ACTIVE.remove();
   }
 }

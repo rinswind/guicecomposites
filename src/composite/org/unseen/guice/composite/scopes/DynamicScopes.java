@@ -2,9 +2,9 @@ package org.unseen.guice.composite.scopes;
 
 import java.lang.annotation.Annotation;
 
+import com.google.inject.Binder;
 import com.google.inject.Key;
 import com.google.inject.Provider;
-import com.google.inject.Scope;
 import com.google.inject.ScopeAnnotation;
 
 public class DynamicScopes {
@@ -13,12 +13,12 @@ public class DynamicScopes {
   
   /**
    * @param <S>
+   * @param binder
    * @param tag
-   * @return
    */
-  public static <S extends Annotation> Scope scope(Class<S> tag) {
+  public static <S extends Annotation> void bindScope(Binder binder, Class<S> tag) {
     checkScopeAnnotation(tag);
-    return new DynamicScope<S>(tag);
+    binder.bindScope(tag, new DynamicScope<S>(tag));
   }
 
   /**

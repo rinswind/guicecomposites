@@ -3,15 +3,15 @@ package org.unseen.guice.composite.scopes.test;
 import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
-import static org.unseen.guice.composite.scopes.DynamicScopes.factory;
-import static org.unseen.guice.composite.scopes.DynamicScopes.scope;
-import static org.unseen.guice.composite.scopes.DynamicScopes.parameter;
 import static org.unseen.guice.composite.scopes.DynamicScopes.external;
+import static org.unseen.guice.composite.scopes.DynamicScopes.factory;
+import static org.unseen.guice.composite.scopes.DynamicScopes.parameter;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 import org.junit.Test;
+import org.unseen.guice.composite.scopes.DynamicScopes;
 import org.unseen.guice.composite.scopes.Parameter;
 
 import com.google.inject.AbstractModule;
@@ -50,10 +50,14 @@ public class ValidationTest {
     Guice.createInjector(new AbstractModule() {
       @Override
       protected void configure() {
-        bindScope(TestScoped.class, scope(TestScoped.class));
+        DynamicScopes.bindScope(binder(), TestScoped.class);
         
         bind(DependentFactory.class).toProvider(factory(DependentFactory.class, TestScoped.class));
-        bind(String.class).annotatedWith(parameter("")).toProvider(external(Key.get(String.class, parameter("")))).in(TestScoped.class);
+        
+        bind(String.class)
+        .annotatedWith(parameter(""))
+        .toProvider(external(Key.get(String.class, parameter(""))))
+        .in(TestScoped.class);
       }
     });
   }
@@ -63,7 +67,7 @@ public class ValidationTest {
     Guice.createInjector(new AbstractModule() {
       @Override
       protected void configure() {
-        bindScope(TestScoped.class, scope(TestScoped.class));
+        DynamicScopes.bindScope(binder(), TestScoped.class);
         
         bind(DependentFactory.class).toProvider(factory(DependentFactory.class, TestScoped.class));
         bind(Dependency.class).to(DependencyImpl.class);

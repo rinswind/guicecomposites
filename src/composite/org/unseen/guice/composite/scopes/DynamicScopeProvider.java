@@ -27,19 +27,12 @@ public class DynamicScopeProvider<T, S extends Annotation> implements Provider<T
   }
   
   public T get() {
-//    System.out.println(this + ".get()");
-    
-    DynamicScopeInstance active = DynamicScopeInstance.active();
-    if (active == null) {
-      throw new IllegalStateException();
-    }
-    
     /*
      * TODO Make sure the scope of the current provider is always equal or wider
      * than the active scope. Wider because a part of the parent scope might be
      * lazily created because of demand by a narrower scope. This will require
      * me to introduce explicit scope ordering.
      */
-    return active.search(key, unscoped, scope);
+    return DynamicScopeInstance.active().search(key, unscoped, scope);
   }
 }
