@@ -12,7 +12,7 @@ import com.google.inject.Injector;
  *
  * @param <F>
  */
-public class DynamicScopeFactory implements InvocationHandler {
+public class FactoryInstance implements InvocationHandler {
   private static final Method TO_STRING;
   private static final Method EQUALS;
   private static final Method HASH_CODE;
@@ -31,11 +31,11 @@ public class DynamicScopeFactory implements InvocationHandler {
    * State
    */
   private final Class<? extends Annotation> scope;
-  private final DynamicContext context;
+  private final DynamicScopeInstance context;
   private final Injector injector;
   
   /** Method suite */
-  private final Map<Method, DynamicScopeFactoryMethod> methods; 
+  private final Map<Method, FactoryMethod> methods; 
   
   /**
    * @param scope
@@ -43,8 +43,8 @@ public class DynamicScopeFactory implements InvocationHandler {
    * @param injector
    * @param methods
    */
-  public DynamicScopeFactory(Class<? extends Annotation> scope, DynamicContext context,
-      Injector injector, Map<Method, DynamicScopeFactoryMethod> methods) {
+  public FactoryInstance(Class<? extends Annotation> scope, DynamicScopeInstance context,
+      Injector injector, Map<Method, FactoryMethod> methods) {
     
     this.scope = scope;
     this.context = context;
@@ -60,7 +60,7 @@ public class DynamicScopeFactory implements InvocationHandler {
     return injector;
   }
   
-  public DynamicContext context() { 
+  public DynamicScopeInstance context() { 
     return context; 
   }
   

@@ -17,7 +17,7 @@ import com.google.inject.internal.ErrorsException;
 /**
  * Implements a single factory method.
  */
-public class DynamicScopeFactoryMethod {
+public class FactoryMethod {
   /** The method this handler implements */
   private final Method method;
   /** The object created into the new dynamic context */
@@ -30,7 +30,7 @@ public class DynamicScopeFactoryMethod {
    * @param errors
    * @throws ErrorsException
    */
-  public DynamicScopeFactoryMethod(Method method, Errors errors) throws ErrorsException {
+  public FactoryMethod(Method method, Errors errors) throws ErrorsException {
     this.method = method;
     this.result = getKey(
         TypeLiteral.get(method.getGenericReturnType()), method, method.getAnnotations(), errors);
@@ -46,21 +46,14 @@ public class DynamicScopeFactoryMethod {
   }
   
   /**
-   * @param scope The dynamic scope which this method creates. Part of the
-   *        factory state.
-   * @param parent The parent of the dyamic context this method will create.
-   *        Part of the factory state.
-   * @param injector The Injector we use to create the first objects of the new.
-   *        Part of the factory state. DynamicContext
-   * @param args Method call parameters to be bound to the parameters of the new
-   *        scope.
+   * @param instance The factory instance over which this method is invoked.
+   * @param args The arguments of the invocation.
    * @return the first object graph of the new scope.
-   * @throws Throwable 
+   * @throws Throwable
    */
   @SuppressWarnings("unchecked")
-  public Object invoke(DynamicScopeFactory instance,Object[] args) throws Throwable {
-    
-    DynamicContext active = DynamicContext.activate(instance.scope(), instance.context());
+  public Object invoke(FactoryInstance instance,Object[] args) throws Throwable {
+    DynamicScopeInstance active = DynamicScopeInstance.activate(instance.scope(), instance.context());
     try {
       int p = 0;
       for (Key<?> paramKey : params) {
@@ -79,7 +72,7 @@ public class DynamicScopeFactoryMethod {
       }
       throw e;
     } finally {
-      DynamicContext.deactivate();
+      DynamicScopeInstance.deactivate();
     }
   }
 

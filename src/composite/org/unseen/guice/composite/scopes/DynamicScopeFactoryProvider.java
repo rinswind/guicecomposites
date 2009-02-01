@@ -24,7 +24,7 @@ public class DynamicScopeFactoryProvider<F, S extends Annotation> implements Pro
   /** The interface of the factories we create */
   private final Class<F> iface;
   /** The method suite of the factories we create */
-  private final Map<Method, DynamicScopeFactoryMethod> methods;
+  private final Map<Method, FactoryMethod> methods;
   
   /** Part of the state loaded into every created factory */
   private final Class<S> scope;
@@ -42,11 +42,11 @@ public class DynamicScopeFactoryProvider<F, S extends Annotation> implements Pro
     /* Build the method suite shared by all factory instances we create */
     Errors errors = new Errors();
     try {
-      this.methods = new HashMap<Method, DynamicScopeFactoryMethod>();
+      this.methods = new HashMap<Method, FactoryMethod>();
       
       /* TODO Also grab methods from superinterfaces */
       for (Method method : iface.getMethods()) {
-        methods.put(method, new DynamicScopeFactoryMethod(method, errors));
+        methods.put(method, new FactoryMethod(method, errors));
       }
     } catch (ErrorsException e) {
       throw new ConfigurationException(e.getErrors().getMessages());
@@ -75,10 +75,10 @@ public class DynamicScopeFactoryProvider<F, S extends Annotation> implements Pro
     }
     
     /* Capture the current scope if any */
-    DynamicContext active = DynamicContext.active();
+    DynamicScopeInstance active = DynamicScopeInstance.active();
     
     /* Return a factory that will continue the scope creation later on */
-    DynamicScopeFactory factory = new DynamicScopeFactory(scope, active, injector, methods);
+    FactoryInstance factory = new FactoryInstance(scope, active, injector, methods);
     
     /*
      * FIX Can cause trouble under OSGi. The problem here is that this class
