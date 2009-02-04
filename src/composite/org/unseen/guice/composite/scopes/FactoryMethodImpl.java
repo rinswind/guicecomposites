@@ -92,7 +92,7 @@ public class FactoryMethodImpl implements FactoryMethod {
    * @see org.unseen.guice.composite.scopes.FactoryMethod#invoke(org.unseen.guice.composite.scopes.FactoryInstance, java.lang.Object[])
    */
   @SuppressWarnings("unchecked")
-  public Object invoke(Object proxy, FactoryInstance instance,Object[] args) throws Throwable {
+  public Object invoke(Object proxy, FactoryInstance instance, Object[] args) throws Throwable {
     DynamicScopeInstance active = DynamicScopeInstance.activate(instance.scope(), instance.context());
     try {
       int p = 0;

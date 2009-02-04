@@ -23,6 +23,18 @@ public class DynamicScopes {
   /**
    * @param <F>
    * @param binder
+   * @param target
+   * @param iface
+   * @return
+   */
+  public static <F> ScopedBindingBuilder bindScope(Binder binder, Class<? extends Annotation> target, Class<F> iface) {
+    bindScope(binder, target);
+    return bindFactory(binder, iface, target);
+  }
+  
+  /**
+   * @param <F>
+   * @param binder
    * @param iface
    * @param target
    * @return

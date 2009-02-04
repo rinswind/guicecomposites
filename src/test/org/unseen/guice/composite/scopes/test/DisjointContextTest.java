@@ -62,12 +62,8 @@ public class DisjointContextTest {
     Injector inj = Guice.createInjector(new AbstractModule() {
       @Override
       protected void configure() {
-        DynamicScopes.bindScope(binder(), HorizontalScoped.class);
-        DynamicScopes.bindScope(binder(), VerticalScoped.class);
-        
-        DynamicScopes.bindFactory(binder(), CenterFactory.class, HorizontalScoped.class);
-        
-        DynamicScopes.bindFactory(binder(), TopFactory.class, VerticalScoped.class).in(HorizontalScoped.class);
+        DynamicScopes.bindScope(binder(), HorizontalScoped.class, CenterFactory.class);
+        DynamicScopes.bindScope(binder(), VerticalScoped.class, TopFactory.class).in(HorizontalScoped.class);
       }
     });
     

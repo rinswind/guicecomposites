@@ -46,9 +46,7 @@ public class ValidationTest {
     Guice.createInjector(new AbstractModule() {
       @Override
       protected void configure() {
-        DynamicScopes.bindScope(binder(), TestScoped.class);
-        
-        DynamicScopes.bindFactory(binder(), DependentFactory.class, TestScoped.class);
+        DynamicScopes.bindScope(binder(), TestScoped.class, DependentFactory.class);
       }
     });
   }
