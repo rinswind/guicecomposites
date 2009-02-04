@@ -9,9 +9,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 import org.junit.Test;
-import org.unseen.guice.composite.scopes.DynamicScopes;
+import org.unseen.guice.composite.scopes.DynamicScopesModule;
 
-import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -59,11 +58,11 @@ public class DisjointContextTest {
   
   @Test
   public void testDisjointScopes() {
-    Injector inj = Guice.createInjector(new AbstractModule() {
+    Injector inj = Guice.createInjector(new DynamicScopesModule() {
       @Override
       protected void configure() {
-        DynamicScopes.bindScope(binder(), HorizontalScoped.class, CenterFactory.class);
-        DynamicScopes.bindScope(binder(), VerticalScoped.class, TopFactory.class).in(HorizontalScoped.class);
+        bind(CenterFactory.class).toDynamicScope(HorizontalScoped.class);
+        bind(TopFactory.class).toDynamicScope(VerticalScoped.class).in(HorizontalScoped.class);
       }
     });
     

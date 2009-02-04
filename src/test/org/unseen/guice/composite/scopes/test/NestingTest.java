@@ -12,10 +12,9 @@ import java.lang.annotation.Target;
 import java.net.Socket;
 
 import org.junit.Test;
-import org.unseen.guice.composite.scopes.DynamicScopes;
+import org.unseen.guice.composite.scopes.DynamicScopesModule;
 import org.unseen.guice.composite.scopes.Parameter;
 
-import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.ScopeAnnotation;
@@ -165,19 +164,19 @@ public class NestingTest {
   
   @Test
   public void testDynamicContextNesting() {
-    Injector inj = createInjector(new AbstractModule() {
+    Injector inj = createInjector(new DynamicScopesModule() {
       @Override
       protected void configure() {
         /* The ServerFactory lives in no scope and creates ServerScoped */
-        DynamicScopes.bindScope(binder(), ServerScoped.class, ServerFactory.class);
+        bind(ServerFactory.class).toDynamicScope(ServerScoped.class);
         bind(Server.class).to(ServerImpl.class);
         
         /* The ConnectionFactory lives in ServerScoped but creates ConnectionScoped */
-        DynamicScopes.bindScope(binder(), ConnectionScoped.class, ConnectionFactory.class).in(ServerScoped.class);
-        bind(Connection.class).to(ConnectionImpl.class);
+        bind(ConnectionFactory.class).toDynamicScope(ConnectionScoped.class).in(ServerScoped.class);
+        bind(Connection.class).to(ConnectionImpl.class).in(ConnectionScoped.class);
         
         /* The request factory lives in ConnectionScoped and creates RequestScoped */
-        DynamicScopes.bindScope(binder(), RequestScoped.class, RequestFactory.class).in(RequestScoped.class);
+        bind(RequestFactory.class).toDynamicScope(RequestScoped.class).in(ConnectionScoped.class);
         bind(Request.class).to(RequestImpl.class);
         bind(Response.class).to(ResponseImpl.class);
       }

@@ -3,12 +3,26 @@ package org.unseen.guice.composite.scopes;
 import java.lang.annotation.Annotation;
 
 import com.google.inject.Binder;
+import com.google.inject.Key;
 import com.google.inject.ScopeAnnotation;
+import com.google.inject.TypeLiteral;
 import com.google.inject.binder.ScopedBindingBuilder;
 
 public class DynamicScopes {
   private DynamicScopes() {
   }
+  
+  public static <T> DynamicScopesAnnotatedBindingBuilder<T> bind(Binder binder, Class<T> key) {
+    return new DynamicScopesAnnotatedBindingBuilderImpl<T>(Key.get(key), binder.bind(key), binder);
+  }
+
+  public static <T> DynamicScopesAnnotatedBindingBuilder<T> bind(Binder binder, TypeLiteral<T> key) {
+    return new DynamicScopesAnnotatedBindingBuilderImpl<T>(Key.get(key), binder.bind(key), binder);
+  }
+
+//  public static <T> DynamicScopesAnnotatedBindingBuilder<T> bind(Binder binder, Key<T> key) {
+//    return new DynamicScopesAnnotatedBindingBuilderImpl<T>(key, binder.bind(key), binder);
+//  }
   
   /**
    * @param <S>
@@ -20,18 +34,6 @@ public class DynamicScopes {
     binder.bindScope(tag, new DynamicScope(tag));
   }
 
-  /**
-   * @param <F>
-   * @param binder
-   * @param target
-   * @param iface
-   * @return
-   */
-  public static <F> ScopedBindingBuilder bindScope(Binder binder, Class<? extends Annotation> target, Class<F> iface) {
-    bindScope(binder, target);
-    return bindFactory(binder, iface, target);
-  }
-  
   /**
    * @param <F>
    * @param binder

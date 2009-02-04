@@ -8,10 +8,9 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 import org.junit.Test;
-import org.unseen.guice.composite.scopes.DynamicScopes;
+import org.unseen.guice.composite.scopes.DynamicScopesModule;
 import org.unseen.guice.composite.scopes.Parameter;
 
-import com.google.inject.AbstractModule;
 import com.google.inject.CreationException;
 import com.google.inject.Guice;
 import com.google.inject.Inject;
@@ -43,10 +42,10 @@ public class ValidationTest {
   
   @Test(expected = CreationException.class)
   public void testMissingDependency() { 
-    Guice.createInjector(new AbstractModule() {
+    Guice.createInjector(new DynamicScopesModule() {
       @Override
       protected void configure() {
-        DynamicScopes.bindScope(binder(), TestScoped.class, DependentFactory.class);
+        bind(DependentFactory.class).toDynamicScope(TestScoped.class);
       }
     });
   }
