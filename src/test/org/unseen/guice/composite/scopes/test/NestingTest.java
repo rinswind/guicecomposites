@@ -76,7 +76,6 @@ public class NestingTest {
     Request request();
   }  
   
-  @ServerScoped
   public static class ServerImpl implements Server {
     private final ConnectionFactory connections;
     
@@ -90,7 +89,6 @@ public class NestingTest {
     }
   }
   
-  @ConnectionScoped
   public static class ConnectionImpl implements Connection {
     private final Socket sock;
     private final Server server;
@@ -116,7 +114,6 @@ public class NestingTest {
     }
   }
   
-  @RequestScoped
   public static class RequestImpl implements Request {
     private final String header;
     private final Connection conn;
@@ -142,7 +139,6 @@ public class NestingTest {
     }
   }  
   
-  @RequestScoped
   public static class ResponseImpl implements Response {
     private final Connection conn;
     private final Request req;
@@ -169,7 +165,7 @@ public class NestingTest {
       protected void configure() {
         /* The ServerFactory lives in no scope and creates ServerScoped */
         bind(ServerFactory.class).toDynamicScope(ServerScoped.class);
-        bind(Server.class).to(ServerImpl.class);
+        bind(Server.class).to(ServerImpl.class).in(ServerScoped.class);
         
         /* The ConnectionFactory lives in ServerScoped but creates ConnectionScoped */
         bind(ConnectionFactory.class).toDynamicScope(ConnectionScoped.class).in(ServerScoped.class);
@@ -177,8 +173,8 @@ public class NestingTest {
         
         /* The request factory lives in ConnectionScoped and creates RequestScoped */
         bind(RequestFactory.class).toDynamicScope(RequestScoped.class).in(ConnectionScoped.class);
-        bind(Request.class).to(RequestImpl.class);
-        bind(Response.class).to(ResponseImpl.class);
+        bind(Request.class).to(RequestImpl.class).in(RequestScoped.class);
+        bind(Response.class).to(ResponseImpl.class).in(RequestScoped.class);
       }
     });
     
