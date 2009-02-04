@@ -168,23 +168,16 @@ public class NestingTest {
     Injector inj = createInjector(new AbstractModule() {
       @Override
       protected void configure() {
-        DynamicScopes.bindScope(binder(), ServerScoped.class);
-        DynamicScopes.bindScope(binder(), ConnectionScoped.class);
-        DynamicScopes.bindScope(binder(), RequestScoped.class);
-        
         /* The ServerFactory lives in no scope and creates ServerScoped */
-        DynamicScopes.bindFactory(binder(), ServerFactory.class, ServerScoped.class);
-        
+        DynamicScopes.bindScope(binder(), ServerScoped.class, ServerFactory.class);
         bind(Server.class).to(ServerImpl.class);
         
         /* The ConnectionFactory lives in ServerScoped but creates ConnectionScoped */
-        DynamicScopes.bindFactory(binder(), ConnectionFactory.class, ConnectionScoped.class).in(ServerScoped.class);
-        
+        DynamicScopes.bindScope(binder(), ConnectionScoped.class, ConnectionFactory.class).in(ServerScoped.class);
         bind(Connection.class).to(ConnectionImpl.class);
         
         /* The request factory lives in ConnectionScoped and creates RequestScoped */
-        DynamicScopes.bindFactory(binder(), RequestFactory.class, RequestScoped.class).in(ConnectionScoped.class);
-        
+        DynamicScopes.bindScope(binder(), RequestScoped.class, RequestFactory.class).in(RequestScoped.class);
         bind(Request.class).to(RequestImpl.class);
         bind(Response.class).to(ResponseImpl.class);
       }
