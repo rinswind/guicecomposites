@@ -64,9 +64,14 @@ public class DynamicScopeInstance {
     T val = null;
     
     if (this.scope == scope) {
-      val = (T) cache.get(key);
-      
-      if (val == null) { 
+      /*
+       * Must check if the cache contains the key because it might be bound to
+       * null. The other way to support null parameters would be to box all
+       * cached objects in a container that can also be empty
+       */
+      if (cache.containsKey(key)) {
+        val = (T) cache.get(key);
+      } else { 
         val = unscoped.get();
         
         /*

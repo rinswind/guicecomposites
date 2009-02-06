@@ -125,20 +125,6 @@ public class FactoryMethodImpl implements FactoryMethod {
     }
   }
 
-//  /**
-//   * @throws ErrorsException 
-//   * @see org.unseen.guice.composite.scopes.FactoryMethod#validate(com.google.inject.Injector, com.google.inject.internal.Errors)
-//   */
-//  public void validate(Injector injector, Errors errors) {
-//    try {
-//      injector.getBinding(result);
-//    } catch (ConfigurationException e) {
-//      errors.merge(e.getErrorMessages());
-//    } catch (CreationException e) {
-//      errors.merge(e.getErrorMessages());
-//    }
-//  }
-  
   /**
    * Returns a key similar to {@code Key}, but with an {@literal @}Parameter
    * binding annotation. This fails if another binding annotation is clobbered

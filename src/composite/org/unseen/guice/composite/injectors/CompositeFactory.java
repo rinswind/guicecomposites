@@ -3,6 +3,8 @@ package org.unseen.guice.composite.injectors;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.util.HashMap;
+import java.util.Map;
 
 import com.google.inject.ConfigurationException;
 import com.google.inject.Injector;
@@ -11,7 +13,6 @@ import com.google.inject.Provider;
 import com.google.inject.ProvisionException;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
-import com.google.inject.internal.collect.ImmutableMap;
 
 /**
  * @author Todor Boev
@@ -20,7 +21,7 @@ public class CompositeFactory<F> implements InvocationHandler {
   private final F proxy;
   private final Injector parent;
   private final Iterable<Module> composed;
-  private final ImmutableMap<Method, CompositeFactoryMethod> methods; 
+  private final Map<Method, CompositeFactoryMethod> methods; 
   
   /**
    * @param <F>
@@ -42,12 +43,11 @@ public class CompositeFactory<F> implements InvocationHandler {
     
     Errors errors = new Errors();
     try {
-      ImmutableMap.Builder<Method, CompositeFactoryMethod> methodsBuilder = ImmutableMap.builder();
+      this.methods = new HashMap<Method, CompositeFactoryMethod>();
       // TODO: also grab methods from superinterfaces
       for (Method method : factory.getMethods()) {
-        methodsBuilder.put(method, new CompositeFactoryMethod(method, errors));
+        methods.put(method, new CompositeFactoryMethod(method, errors));
       }
-      this.methods = methodsBuilder.build();
     } catch (ErrorsException e) {
       throw new ConfigurationException(e.getErrors().getMessages());
     }

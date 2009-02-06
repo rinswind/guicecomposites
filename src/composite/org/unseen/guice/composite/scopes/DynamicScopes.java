@@ -43,7 +43,7 @@ public class DynamicScopes {
    */
   public static <F> ScopedBindingBuilder bindFactory(Binder binder, Class<F> iface, Class<? extends Annotation> target) {
     checkScopeAnnotation(target);
-    return binder.bind(iface).toProvider(new DynamicScopeFactoryProvider<F>(iface, target, binder));
+    return binder.bind(iface).toProvider(new FactoryProvider<F>(iface, target, binder));
   }
   
   /**

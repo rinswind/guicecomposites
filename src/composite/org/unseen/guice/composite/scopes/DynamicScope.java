@@ -26,7 +26,17 @@ public class DynamicScope implements Scope {
     return tag;
   }
   
-  public <T> Provider<T> scope(Key<T> key, Provider<T> unscoped) {
-    return new DynamicScopeProvider<T>(key, unscoped, tag);
+  public <T> Provider<T> scope(final Key<T> key, final Provider<T> unscoped) {
+    return new Provider<T>() {
+      public T get() {
+        /*
+         * TODO Make sure the scope of the current provider is always equal or wider
+         * than the active scope. Wider because a part of the parent scope might be
+         * lazily created because of demand by a narrower scope. This will require
+         * me to introduce explicit scope ordering.
+         */
+        return DynamicScopeInstance.active().search(key, unscoped, tag);
+      }
+    };
   }
 }
