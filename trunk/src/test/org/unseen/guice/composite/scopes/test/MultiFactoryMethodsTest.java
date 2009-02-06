@@ -8,6 +8,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 import java.net.Socket;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.unseen.guice.composite.scopes.DynamicScopesModule;
 import org.unseen.guice.composite.scopes.Parameter;
@@ -17,6 +18,7 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.ScopeAnnotation;
 
+@Ignore
 public class MultiFactoryMethodsTest {
   @ScopeAnnotation
   @Retention(RUNTIME)
