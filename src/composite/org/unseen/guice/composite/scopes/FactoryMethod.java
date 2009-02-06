@@ -1,9 +1,23 @@
 package org.unseen.guice.composite.scopes;
 
-import com.google.inject.Injector;
-import com.google.inject.internal.Errors;
+import java.util.List;
 
+import com.google.inject.Key;
+
+/**
+ * @author Todor Boev
+ */
 public interface FactoryMethod {
+  /**
+   * @return
+   */
+  List<Key<?>> parameterTypes();
+  
+  /**
+   * @return
+   */
+  Key<?> returnType();
+  
   /**
    * @param proxy the proxy called from the user code.
    * @param instance the instance backing the proxy.
@@ -12,10 +26,4 @@ public interface FactoryMethod {
    * @throws Throwable
    */
   Object invoke(Object proxy, FactoryInstance instance, Object[] args) throws Throwable;
-  
-  /**
-   * @param injector the Injector in which everyone lives.
-   * @param errors a place to add errors.
-   */
-  void validate(Injector injector, Errors errors);
 }

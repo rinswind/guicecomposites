@@ -5,17 +5,25 @@ import static java.util.Arrays.asList;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.google.inject.Binder;
+import com.google.inject.Binding;
 import com.google.inject.ConfigurationException;
 import com.google.inject.CreationException;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+import com.google.inject.Key;
 import com.google.inject.Provider;
+import com.google.inject.Scope;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
+import com.google.inject.spi.BindingScopingVisitor;
 import com.google.inject.spi.Message;
 
 /**
@@ -27,8 +35,13 @@ public class DynamicScopeFactoryProvider<F> implements Provider<F> {
     public Object invoke(Object proxy, FactoryInstance instance, Object[] args) throws Throwable {
       return args[0] == proxy || args[0] == instance;
     }
+    
+    public List<Key<?>> parameterTypes() {
+      throw new UnsupportedOperationException();
+    }
 
-    public void validate(Injector injector, Errors errors) {
+    public Key<?> returnType() {
+      throw new UnsupportedOperationException();
     }
   };
   
@@ -36,8 +49,13 @@ public class DynamicScopeFactoryProvider<F> implements Provider<F> {
     public Object invoke(Object proxy, FactoryInstance instance, Object[] args) throws Throwable {
       return proxy.getClass().getInterfaces()[0].getName();
     }
+    
+    public List<Key<?>> parameterTypes() {
+      throw new UnsupportedOperationException();
+    }
 
-    public void validate(Injector injector, Errors errors) {
+    public Key<?> returnType() {
+      throw new UnsupportedOperationException();
     }
   };
   
@@ -45,8 +63,60 @@ public class DynamicScopeFactoryProvider<F> implements Provider<F> {
     public Object invoke(Object proxy, FactoryInstance instance, Object[] args) throws Throwable {
       return instance.hashCode();
     }
+    
+    public List<Key<?>> parameterTypes() {
+      throw new UnsupportedOperationException();
+    }
 
-    public void validate(Injector injector, Errors errors) {
+    public Key<?> returnType() {
+      throw new UnsupportedOperationException();
+    }
+  };
+  
+  /**
+   *
+   */
+  private static class ScopeChecker implements BindingScopingVisitor<Void> {
+    private final String checked;
+    private final Object source;
+    private final Class<? extends Annotation> expected;
+    private final Errors errors;
+    
+    public ScopeChecker(Class<? extends Annotation> expected, String checked, Object source,
+        Errors errors) {
+      
+      this.checked = checked;
+      this.source = source;
+      this.expected = expected;
+      this.errors = errors;
+    }
+    
+    public Void visitScopeAnnotation(Class<? extends Annotation> tag) {
+      if (expected != tag){
+        error(tag);
+      }
+      return null;
+    }
+    
+    public Void visitScope(Scope scope) {
+      if (!(scope instanceof DynamicScope) || ((DynamicScope) scope).annotation() != expected){
+        error(scope);
+      }
+      return null;
+    }
+    
+    public Void visitEagerSingleton() {
+      error("Eager Singleton");
+      return null;
+    }
+
+    public Void visitNoScoping() {
+      error("No scope");
+      return null;
+    }
+
+    private void error(Object found) {
+      errors.withSource(source).addMessage("For %s expected scope %s but found %s", checked, expected, found);
     }
   };
   
@@ -67,27 +137,31 @@ public class DynamicScopeFactoryProvider<F> implements Provider<F> {
    * @throws ErrorsException 
    */
   public DynamicScopeFactoryProvider(Class<F> iface, Class<? extends Annotation> scope, Binder binder) {
+    if (!iface.isInterface()) {
+      throw new ConfigurationException(Arrays.asList(new Message("Only interfaces can be used for "
+          + " scope factories. Found a concrete class: " + iface)));
+    }
+    
     this.iface = iface;
     this.scope = scope;
     
     /* Build the method suite shared by all factory instances we create */
-    try {
-      this.methods = new HashMap<Method, FactoryMethod>();
-      
-      /* TODO Also grab methods from superinterfaces */
-      for (Method method : iface.getMethods()) {
-        methods.put(method, new FactoryMethodImpl(method, scope, binder));
+    this.methods = new HashMap<Method, FactoryMethod>();
+
+    for (Class<?> cl = iface; cl != null; cl = iface.getSuperclass()) {
+      for (Method method : cl.getMethods()) {
+        methods.put(method, new FactoryMethodImpl(method));
       }
-      
-      /*
-       * Add the Object methods to the suite - except these the other object
-       * methods are handled by the proxy
-       */
-      methods.put(Object.class.getMethod("equals", Object.class), EQUALS);
-      methods.put(Object.class.getMethod("toString"), TO_STRING);
-      methods.put(Object.class.getMethod("hashCode"), HASH_CODE);
-    } catch (NoSuchMethodException e) {
-      throw new RuntimeException("Unexpected", e);
+    }
+    
+    /* Bind the common set of parameters described by all collected methods */
+    Set<Key<?>> params = new HashSet<Key<?>>();
+    for (FactoryMethod method : methods.values()) {
+      params.addAll(method.parameterTypes());
+    }
+    
+    for (Key<?> paramKey : params) {
+      binder.bind(paramKey).toProvider(new DynamicScopeParameterProvider(paramKey)).in(scope);
     }
   }
 
@@ -103,11 +177,38 @@ public class DynamicScopeFactoryProvider<F> implements Provider<F> {
     
     this.injector = injector;
     
+    /*
+     * Validate that 
+     * 
+     * - the product of the factory can be built.
+     * - the product is in the same scope as the factory.
+     * - all factory methods lead to the same binding. I.e. they are variants of the
+     * constructor of the same class.
+     */
     Errors errors = new Errors();
-    for (FactoryMethod m : methods.values()) {
-      m.validate(injector, errors);
+    for (Map.Entry<Method, FactoryMethod> ent : methods.entrySet()) {
+      try {
+        Binding<?> binding = injector.getBinding(ent.getValue().returnType());
+        binding.acceptScopingVisitor(new ScopeChecker(this.scope, "return value", ent.getKey(), errors));
+      } catch (ConfigurationException e) {
+        errors.merge(e.getErrorMessages());
+      } catch (CreationException e) {
+        errors.merge(e.getErrorMessages());
+      }
     }
     errors.throwConfigurationExceptionIfErrorsExist();
+
+    /*
+     * Add the Object methods to the suite after the validation so that we avoid
+     * their processing.
+     */
+    try {
+      methods.put(Object.class.getMethod("equals", Object.class), EQUALS);
+      methods.put(Object.class.getMethod("toString"), TO_STRING);
+      methods.put(Object.class.getMethod("hashCode"), HASH_CODE);
+    } catch (NoSuchMethodException e) {
+      throw new RuntimeException("Unexpected", e);
+    }
   }
 
   /**

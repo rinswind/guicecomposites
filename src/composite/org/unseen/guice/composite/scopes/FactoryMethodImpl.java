@@ -8,10 +8,7 @@ import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.List;
 
-import com.google.inject.Binder;
 import com.google.inject.ConfigurationException;
-import com.google.inject.CreationException;
-import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.ProvisionException;
 import com.google.inject.TypeLiteral;
@@ -57,12 +54,13 @@ public class FactoryMethodImpl implements FactoryMethod {
    * @param errors
    * @throws ErrorsException 
    */
-  @SuppressWarnings("unchecked")
-  public FactoryMethodImpl(Method method, Class<? extends Annotation> scope, Binder binder) {
-    
+  public FactoryMethodImpl(Method method) {
     this.method = method;
     
-    Errors errors = new Errors();    
+    /* If even one key fails to be built the errors will contain the reason
+     * and an ErrorsException will be thrown out of getKey or getParamKey 
+     */
+    Errors errors = new Errors();
     try {
       /* Build this methods return type */
       this.result = getKey(
@@ -73,21 +71,29 @@ public class FactoryMethodImpl implements FactoryMethod {
       Annotation[][] paramAnnotations = method.getParameterAnnotations();
       Key<?>[] paramArray = new Key<?>[paramTypes.length];
       for (int p = 0; p < paramArray.length; p++) {
-        Key paramKey = paramKey(paramTypes[p], method, paramAnnotations[p], errors);
-        
-        paramArray[p] = paramKey;  
-        
-        binder.bind(paramKey).toProvider(new DynamicScopeParameterProvider(paramKey)).in(scope);
+        paramArray[p] = getParamKey(paramTypes[p], method, paramAnnotations[p], errors);  
       }
     
       this.params = Arrays.asList(paramArray);
-      
-      errors.throwConfigurationExceptionIfErrorsExist();
     } catch (ErrorsException e) {
       throw new ConfigurationException(errors.getMessages());
     }
   }
+
+  /**
+   * @see org.unseen.guice.composite.scopes.FactoryMethod#returnType()
+   */
+  public Key<?> returnType() {
+    return result;
+  }
   
+  /**
+   * @see org.unseen.guice.composite.scopes.FactoryMethod#parameterTypes()
+   */
+  public List<Key<?>> parameterTypes() {
+    return params;
+  }
+
   /**
    * @see org.unseen.guice.composite.scopes.FactoryMethod#invoke(org.unseen.guice.composite.scopes.FactoryInstance, java.lang.Object[])
    */
@@ -119,19 +125,19 @@ public class FactoryMethodImpl implements FactoryMethod {
     }
   }
 
-  /**
-   * @throws ErrorsException 
-   * @see org.unseen.guice.composite.scopes.FactoryMethod#validate(com.google.inject.Injector, com.google.inject.internal.Errors)
-   */
-  public void validate(Injector injector, Errors errors) {
-    try {
-      injector.getBinding(result);
-    } catch (ConfigurationException e) {
-      errors.merge(e.getErrorMessages());
-    } catch (CreationException e) {
-      errors.merge(e.getErrorMessages());
-    }
-  }
+//  /**
+//   * @throws ErrorsException 
+//   * @see org.unseen.guice.composite.scopes.FactoryMethod#validate(com.google.inject.Injector, com.google.inject.internal.Errors)
+//   */
+//  public void validate(Injector injector, Errors errors) {
+//    try {
+//      injector.getBinding(result);
+//    } catch (ConfigurationException e) {
+//      errors.merge(e.getErrorMessages());
+//    } catch (CreationException e) {
+//      errors.merge(e.getErrorMessages());
+//    }
+//  }
   
   /**
    * Returns a key similar to {@code Key}, but with an {@literal @}Parameter
@@ -139,24 +145,24 @@ public class FactoryMethodImpl implements FactoryMethod {
    * in the process. If the key already has the {@literal @}Parameter annotation,
    * it is returned as-is to preserve any String value.
    */
-  private static Key<?> paramKey(Type type, Method method, Annotation[] annotations, Errors errors) 
-    throws ErrorsException {
+  private static Key<?> getParamKey(Type paramType, Method method, Annotation[] paramTags,
+      Errors errors) throws ErrorsException {
     
-    Key<?> key = getKey(TypeLiteral.get(type), method, annotations, errors); 
+    Key<?> key = getKey(TypeLiteral.get(paramType), method, paramTags, errors); 
 
-    Class<? extends Annotation> annotation = key.getAnnotationType();
+    Class<? extends Annotation> tag = key.getAnnotationType();
     
-    if (annotation == null) {
+    if (tag == null) {
       return Key.get(key.getTypeLiteral(), DEFAULT_TAG);
     }
 
-    if (annotation == Parameter.class) {
+    if (tag == Parameter.class) {
       return key;
     }
 
     throw errors
       .withSource(method)
-      .addMessage("Only @Parameter is allowed for factory parameters, but found @%s", annotation)
+      .addMessage("Only @Parameter is allowed for factory parameters, but found @%s", tag)
       .toException();
   }
   

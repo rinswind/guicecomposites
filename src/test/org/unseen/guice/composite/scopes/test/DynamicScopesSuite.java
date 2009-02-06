@@ -9,8 +9,9 @@ import org.junit.runners.Suite.SuiteClasses;
   DiamondTest.class, 
   DisjointContextTest.class, 
   NestingTest.class, 
-  ValidationTest.class, 
-  MultiFactoryMethodsTest.class
+  ValidationTests.class, 
+  MultiFactoryMethodsTest.class,
+  ParameterTests.class
 })
 public class DynamicScopesSuite {
 }

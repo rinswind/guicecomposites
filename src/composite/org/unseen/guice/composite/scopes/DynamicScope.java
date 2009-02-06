@@ -17,6 +17,15 @@ public class DynamicScope implements Scope {
     this.tag = tag;
   }
 
+  @Override
+  public String toString() {
+    return "DynamicScope(" + tag.getCanonicalName() + ")";
+  }
+  
+  public Class<? extends Annotation> annotation() {
+    return tag;
+  }
+  
   public <T> Provider<T> scope(Key<T> key, Provider<T> unscoped) {
     return new DynamicScopeProvider<T>(key, unscoped, tag);
   }
