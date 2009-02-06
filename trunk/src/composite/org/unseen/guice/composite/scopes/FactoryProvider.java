@@ -25,12 +25,13 @@ import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
 import com.google.inject.spi.BindingScopingVisitor;
 import com.google.inject.spi.Message;
+import com.google.inject.util.Providers;
 
 /**
  * @author Todor Boev
  * @param <F>
  */
-public class DynamicScopeFactoryProvider<F> implements Provider<F> {
+public class FactoryProvider<F> implements Provider<F> {
   private static final FactoryMethod EQUALS =  new FactoryMethod() {
     public Object invoke(Object proxy, FactoryInstance instance, Object[] args) throws Throwable {
       return args[0] == proxy || args[0] == instance;
@@ -136,7 +137,7 @@ public class DynamicScopeFactoryProvider<F> implements Provider<F> {
    * @param binder
    * @throws ErrorsException 
    */
-  public DynamicScopeFactoryProvider(Class<F> iface, Class<? extends Annotation> scope, Binder binder) {
+  public FactoryProvider(Class<F> iface, Class<? extends Annotation> scope, Binder binder) {
     if (!iface.isInterface()) {
       throw new ConfigurationException(Arrays.asList(new Message("Only interfaces can be used for "
           + " scope factories. Found a concrete class: " + iface)));
@@ -145,7 +146,6 @@ public class DynamicScopeFactoryProvider<F> implements Provider<F> {
     this.iface = iface;
     this.scope = scope;
     
-    /* Build the method suite shared by all factory instances we create */
     this.methods = new HashMap<Method, FactoryMethod>();
 
     for (Class<?> cl = iface; cl != null; cl = iface.getSuperclass()) {
@@ -154,14 +154,22 @@ public class DynamicScopeFactoryProvider<F> implements Provider<F> {
       }
     }
     
-    /* Bind the common set of parameters described by all collected methods */
+    bindParameterSet(scope, binder);
+  }
+
+  @SuppressWarnings("unchecked")
+  private void bindParameterSet(Class<? extends Annotation> scope, Binder binder) {
     Set<Key<?>> params = new HashSet<Key<?>>();
     for (FactoryMethod method : methods.values()) {
       params.addAll(method.parameterTypes());
     }
     
     for (Key<?> paramKey : params) {
-      binder.bind(paramKey).toProvider(new DynamicScopeParameterProvider(paramKey)).in(scope);
+      /*
+       * All factory parameters are by default null if not overridden by values
+       * cached from a factory method arguments.
+       */
+      binder.bind(paramKey).toProvider((Provider) Providers.of(null)).in(scope);
     }
   }
 
@@ -171,24 +179,21 @@ public class DynamicScopeFactoryProvider<F> implements Provider<F> {
   @Inject
   public void setInjector(Injector injector) {
     if (this.injector != null) {
-      throw new ConfigurationException(asList(new Message(DynamicScopeFactoryProvider.class,
+      throw new ConfigurationException(asList(new Message(FactoryProvider.class,
           "DynamicScopeFactoryProviders can only be used in one Injector.")));
     }
     
     this.injector = injector;
     
     /*
-     * Validate that 
-     * 
-     * - the product of the factory can be built.
-     * - the product is in the same scope as the factory.
-     * - all factory methods lead to the same binding. I.e. they are variants of the
-     * constructor of the same class.
+     * Validate that the product of the factory can be built and that the
+     * product is in the same scope as the factory.
      */
     Errors errors = new Errors();
+    Binding<?> binding = null;
     for (Map.Entry<Method, FactoryMethod> ent : methods.entrySet()) {
       try {
-        Binding<?> binding = injector.getBinding(ent.getValue().returnType());
+        binding = injector.getBinding(ent.getValue().returnType());
         binding.acceptScopingVisitor(new ScopeChecker(this.scope, "return value", ent.getKey(), errors));
       } catch (ConfigurationException e) {
         errors.merge(e.getErrorMessages());
@@ -216,7 +221,7 @@ public class DynamicScopeFactoryProvider<F> implements Provider<F> {
    */
   public F get() {
     if (injector == null) {
-      throw new CreationException(asList(new Message(DynamicScopeFactoryProvider.class,
+      throw new CreationException(asList(new Message(FactoryProvider.class,
           "DynamicScopeFactoryProvider is not initalized with an Injector")));
     }
     

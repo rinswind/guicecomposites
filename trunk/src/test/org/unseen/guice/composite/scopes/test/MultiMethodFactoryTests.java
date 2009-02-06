@@ -8,7 +8,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 import java.net.Socket;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.unseen.guice.composite.scopes.DynamicScopesModule;
 import org.unseen.guice.composite.scopes.Parameter;
@@ -17,9 +16,9 @@ import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.ScopeAnnotation;
+import com.google.inject.internal.Nullable;
 
-@Ignore
-public class MultiFactoryMethodsTest {
+public class MultiMethodFactoryTests {
   @ScopeAnnotation
   @Retention(RUNTIME)
   @Target({TYPE, METHOD})
@@ -28,12 +27,19 @@ public class MultiFactoryMethodsTest {
   
   interface ConnectionFactory {
     Connection create(Socket socket);
+    
     Connection create(Socket socket, @Parameter("setting") String setting);
   }
   
   public static class Connection {
-    @Inject Socket socket;
-    @Inject @Parameter("setting") String setting;
+    final Socket socket;
+    final String setting;
+    
+    @Inject
+    public Connection(@Parameter Socket socket, @Nullable @Parameter("setting") String setting) {
+      this.socket = socket;
+      this.setting = setting;
+    }
   }
   
   @Test 

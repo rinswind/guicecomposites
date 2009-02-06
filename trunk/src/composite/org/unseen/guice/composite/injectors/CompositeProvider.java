@@ -1,12 +1,13 @@
 package org.unseen.guice.composite.injectors;
 
 
+import java.util.Arrays;
+
 import com.google.inject.ConfigurationException;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.google.inject.Provider;
-import com.google.inject.internal.collect.ImmutableList;
 import com.google.inject.spi.Message;
 
 /**
@@ -34,7 +35,7 @@ public class CompositeProvider<F> implements Provider<F> {
   @Inject
   public void setParent(Injector injector) {
     if (factory != null) {
-      throw new ConfigurationException(ImmutableList.of(new Message(CompositeProvider.class,
+      throw new ConfigurationException(Arrays.asList(new Message(CompositeProvider.class,
           "CompositeFactories may only be used in one Injector.")));
     }
 

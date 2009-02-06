@@ -48,7 +48,7 @@ public class DynamicScopesLinkedBindingBuilderImpl<T> implements DynamicScopesLi
     }
     
     binder.bindScope(tag, new DynamicScope(tag));
-    return wrapped.toProvider(new DynamicScopeFactoryProvider(key.getTypeLiteral().getRawType(), tag, binder));
+    return wrapped.toProvider(new FactoryProvider(key.getTypeLiteral().getRawType(), tag, binder));
   }
   
   public ScopedBindingBuilder to(Class<? extends T> implementation) {
