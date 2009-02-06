@@ -26,21 +26,6 @@ public class DynamicScopesLinkedBindingBuilderImpl<T> implements DynamicScopesLi
     this.binder = binder;
   }
   
-//  @SuppressWarnings("unchecked")
-//  public void toDynamicScope(final Class<?> impl) {
-//    toComposition(new AbstractModule() {
-//      @Override
-//      protected void configure() {
-//        Key implKey = Key.get(impl);
-//        
-//        bind(implKey);
-//        for (Class<?> iface : impl.getInterfaces()) {
-//          bind(Key.get(iface)).to(implKey);
-//        }
-//      }
-//    });
-//  }
-  
   @SuppressWarnings("unchecked")
   public ScopedBindingBuilder toDynamicScope(Class<? extends Annotation> tag) {
     if (tag.getAnnotation(ScopeAnnotation.class) == null) {
@@ -50,6 +35,29 @@ public class DynamicScopesLinkedBindingBuilderImpl<T> implements DynamicScopesLi
     binder.bindScope(tag, new DynamicScope(tag));
     return wrapped.toProvider(new FactoryProvider(key.getTypeLiteral().getRawType(), tag, binder));
   }
+  
+//  @SuppressWarnings("unchecked")
+//  public ScopedBindingBuilder toSingletonDynamicScope(final Class<?> impl) {
+//    PrivateBinder privBinder = binder.newPrivateBinder();
+//    
+//    Key implKey = Key.get(impl);
+//    
+//    /* FIX must analyze all the methods of the factory and bind the impl 
+//     * only to their products. Must make sure all the products return
+//     * types compatible with the impl class.
+//     */
+//    privBinder.bind(implKey);
+//    privBinder.expose(implKey);
+//    
+//    for (Class<?> iface : impl.getInterfaces()) {
+//      Key<?> ifaceKey = Key.get(iface);
+//      privBinder.bind(ifaceKey).to(implKey);
+//      privBinder.expose(ifaceKey);
+//    }
+//    
+//    /* Must instantiate a new scoping annotation on the fly? */
+//    return toDynamicScope();
+//  }
   
   public ScopedBindingBuilder to(Class<? extends T> implementation) {
     return wrapped.to(implementation);

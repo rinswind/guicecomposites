@@ -19,6 +19,7 @@ import com.google.inject.Injector;
 import com.google.inject.ProvisionException;
 import com.google.inject.ScopeAnnotation;
 import com.google.inject.internal.Nullable;
+
 public class ParameterTests {
   @ScopeAnnotation
   @Retention(RUNTIME)
