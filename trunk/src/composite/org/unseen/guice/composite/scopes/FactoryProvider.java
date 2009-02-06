@@ -1,7 +1,5 @@
 package org.unseen.guice.composite.scopes;
 
-import static java.util.Arrays.asList;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
@@ -174,15 +172,10 @@ public class FactoryProvider<F> implements Provider<F> {
   }
 
   /**
-   * At injector-creation time, we initialize and validate the the method suite.
+   * At injector-creation time, validate the the factory method suite.
    */
   @Inject
   public void setInjector(Injector injector) {
-    if (this.injector != null) {
-      throw new ConfigurationException(asList(new Message(FactoryProvider.class,
-          "DynamicScopeFactoryProviders can only be used in one Injector.")));
-    }
-    
     this.injector = injector;
     
     /*
@@ -220,11 +213,6 @@ public class FactoryProvider<F> implements Provider<F> {
    * @see com.google.inject.Provider#get()
    */
   public F get() {
-    if (injector == null) {
-      throw new CreationException(asList(new Message(FactoryProvider.class,
-          "DynamicScopeFactoryProvider is not initalized with an Injector")));
-    }
-    
     /* Capture the current scope if any - this is the last part of the instance state */
     DynamicScopeInstance active = DynamicScopeInstance.isActive() ? DynamicScopeInstance.active() : null;
     
