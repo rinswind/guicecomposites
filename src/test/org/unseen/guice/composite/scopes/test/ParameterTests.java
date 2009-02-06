@@ -16,9 +16,9 @@ import org.unseen.guice.composite.scopes.Parameter;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+import com.google.inject.ProvisionException;
 import com.google.inject.ScopeAnnotation;
 import com.google.inject.internal.Nullable;
-
 public class ParameterTests {
   @ScopeAnnotation
   @Retention(RUNTIME)
@@ -27,15 +27,17 @@ public class ParameterTests {
   }
   
   interface ParameterizedFactory {
-    Parameterized create(String param);
+    Parameterized create(@Parameter("a") String a, @Parameter("b") String b);
   }
   
   public static class Parameterized {
-    final String param;
+    final String a;
+    final String b;
     
     @Inject     
-    public Parameterized(@Nullable @Parameter String param) {
-      this.param = param;
+    public Parameterized(@Parameter("a") String a, @Nullable @Parameter("b") String b) {
+      this.a = a;
+      this.b = b;
     }
   }
   
@@ -50,8 +52,9 @@ public class ParameterTests {
     });
     
     ParameterizedFactory fact = inj.getInstance(ParameterizedFactory.class);
-    Parameterized par = fact.create("test");
-    assertEquals("test", par.param);
+    Parameterized par = fact.create("a", "b");
+    assertEquals("a", par.a);
+    assertEquals("b", par.b);
   }
   
   @Test
@@ -65,7 +68,22 @@ public class ParameterTests {
     });
     
     ParameterizedFactory fact = inj.getInstance(ParameterizedFactory.class);
-    Parameterized par = fact.create(null);
-    assertNull(par.param);
+    Parameterized par = fact.create("a", null);
+    assertEquals("a", par.a);
+    assertNull(par.b);
+  }
+  
+  @Test(expected = ProvisionException.class)
+  public void testUnannotatedNullParameter() {
+    Injector inj = createInjector(new DynamicScopesModule() {
+      @Override
+      protected void configure() {
+        bind(ParameterizedFactory.class).toDynamicScope(ParameterizedScope.class);
+        bind(Parameterized.class).in(ParameterizedScope.class);
+      }
+    });
+    
+    ParameterizedFactory fact = inj.getInstance(ParameterizedFactory.class);
+    fact.create(null, "b");
   }
 }
