@@ -11,4 +11,6 @@ import com.google.inject.binder.ScopedBindingBuilder;
  */
 public interface DynamicScopesLinkedBindingBuilder<T> extends LinkedBindingBuilder<T> {
   ScopedBindingBuilder toDynamicScope(Class<? extends Annotation> tag);
+  
+//  ScopedBindingBuilder toSingletonDynamicScope(Class<?> member);
 }
