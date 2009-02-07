@@ -4,7 +4,7 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 import org.unseen.guice.composite.scopes.Parameter;
-import org.unseen.guice.composite.scopes.edsl.DynamicScopesModule;
+import org.unseen.guice.composite.scopes.binder.DynamicScopesModule;
 
 import com.google.inject.Guice;
 import com.google.inject.Inject;

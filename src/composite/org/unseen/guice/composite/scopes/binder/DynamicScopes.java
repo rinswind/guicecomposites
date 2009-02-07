@@ -1,4 +1,4 @@
-package org.unseen.guice.composite.scopes.edsl;
+package org.unseen.guice.composite.scopes.binder;
 
 
 import com.google.inject.Binder;

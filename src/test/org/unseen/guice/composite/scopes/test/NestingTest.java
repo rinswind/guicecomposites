@@ -13,7 +13,7 @@ import java.net.Socket;
 
 import org.junit.Test;
 import org.unseen.guice.composite.scopes.Parameter;
-import org.unseen.guice.composite.scopes.edsl.DynamicScopesModule;
+import org.unseen.guice.composite.scopes.binder.DynamicScopesModule;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;

@@ -1,4 +1,4 @@
-package org.unseen.guice.composite.scopes.edsl;
+package org.unseen.guice.composite.scopes.binder;
 
 import java.lang.annotation.Annotation;
 import java.util.HashSet;
