@@ -6,7 +6,7 @@ import static junit.framework.Assert.assertTrue;
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
-import org.unseen.guice.composite.injectors.Parameter;
+import org.unseen.guice.composite.Parameter;
 import org.unseen.guice.composite.injectors.binder.CompositeModule;
 
 import com.google.inject.AbstractModule;

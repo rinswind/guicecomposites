@@ -12,7 +12,7 @@ import java.lang.annotation.Target;
 import java.net.Socket;
 
 import org.junit.Test;
-import org.unseen.guice.composite.scopes.Parameter;
+import org.unseen.guice.composite.Parameter;
 import org.unseen.guice.composite.scopes.binder.DynamicScopesModule;
 
 import com.google.inject.Inject;

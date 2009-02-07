@@ -3,7 +3,7 @@ package org.unseen.guice.composite.injectors.test;
 import static org.junit.Assert.*;
 
 import org.junit.Test;
-import org.unseen.guice.composite.injectors.Parameter;
+import org.unseen.guice.composite.Parameter;
 import org.unseen.guice.composite.injectors.binder.CompositeModule;
 
 import com.google.inject.Guice;
