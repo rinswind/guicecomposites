@@ -15,6 +15,7 @@ import com.google.inject.Scope;
 import com.google.inject.ScopeAnnotation;
 import com.google.inject.TypeLiteral;
 import com.google.inject.binder.LinkedBindingBuilder;
+import com.google.inject.binder.PrivateBinder;
 import com.google.inject.binder.ScopedBindingBuilder;
 import com.google.inject.util.Providers;
 
@@ -41,11 +42,12 @@ public class DynamicScopesLinkedBindingBuilderImpl<T> implements DynamicScopesLi
     
     Class<T> iface = (Class<T>) key.getTypeLiteral().getRawType();
     
-    /* Bind a new scope instance for this factory */
-    binder.bindScope(tag, new DynamicScope(tag));
+    /* Create a scope and a factory for that scope */
+    DynamicScope scope = new DynamicScope(tag);
+    FactoryProvider<T> factory = new FactoryProvider<T>(iface, scope);
     
-    /* Create the factory */
-    FactoryProvider<T> factory = new FactoryProvider<T>(iface, tag);
+    /* Bind the scope */
+    binder.bindScope(tag, scope);
     
     /* Bind providers for the common set of factory parameters */
     Set<Key<?>> params = new HashSet<Key<?>>();
@@ -65,24 +67,48 @@ public class DynamicScopesLinkedBindingBuilderImpl<T> implements DynamicScopesLi
     return wrapped.toProvider(factory);
   }
   
-//  @SuppressWarnings("unchecked")
-//  public ScopedBindingBuilder toSingletonDynamicScope(final Class<?> impl) {
-//    PrivateBinder privBinder = binder.newPrivateBinder();
-//    
-//    Key implKey = Key.get(impl);
-//    
-//    privBinder.bind(implKey);
-//    privBinder.expose(implKey);
-//    
-//    for (Class<?> iface : impl.getInterfaces()) {
-//      Key<?> ifaceKey = Key.get(iface);
-//      privBinder.bind(ifaceKey).to(implKey);
-//      privBinder.expose(ifaceKey);
-//    }
-//    
-//    /* Must instantiate a new scoping annotation on the fly? */
-//    return toDynamicScope();
-//  }
+  @SuppressWarnings("unchecked")
+  public ScopedBindingBuilder toSingletonDynamicScope(Class<?> impl) {
+    /* We want to hide the parameter bindings in a private space */
+    PrivateBinder privBinder = binder.newPrivateBinder();
+    
+    Class<T> iface = (Class<T>) key.getTypeLiteral().getRawType();
+    
+    /*
+     * Create a scope and a factory for that scope. This scope has no associated
+     * annotation.
+     */
+    DynamicScope scope = new DynamicScope(null);
+    FactoryProvider<T> factory = new FactoryProvider<T>(iface, scope);
+    
+    /* Collect the unique sets of parameters and return types */
+    Set<Key<?>> params = new HashSet<Key<?>>();
+    Set<Key<?>> returns = new HashSet<Key<?>>();
+    for (FactoryMethod method : factory.methodSuite().values()) {
+      returns.add(method.returnType());
+      params.addAll(method.parameterTypes());
+    }
+    
+    /* Process the returns */
+    for (Key returnKey : returns) {
+      System.out.println("binding " + returnKey + " to " + impl);
+      
+      privBinder.bind(returnKey).to(impl).in(scope);
+      privBinder.expose(returnKey);
+    }
+    
+    /* Process the parameters */
+    for (Key paramKey : params) {
+      /*
+       * All factory parameters are by default null if not overridden by values
+       * cached from a factory method arguments.
+       */
+      privBinder.bind(paramKey).toProvider(Providers.of(null)).in(scope);
+    }
+    
+    /* Finally bind the factory itself and continue the DSL */
+    return wrapped.toProvider(factory);
+  }
   
   public ScopedBindingBuilder to(Class<? extends T> implementation) {
     return wrapped.to(implementation);

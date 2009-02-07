@@ -19,7 +19,7 @@ public class DynamicScope implements Scope {
 
   @Override
   public String toString() {
-    return "DynamicScope(" + tag.getCanonicalName() + ")";
+    return "DynamicScope(" + (tag != null ? tag.getCanonicalName() : "anonymous") + ")";
   }
   
   public Class<? extends Annotation> annotation() {
@@ -27,6 +27,8 @@ public class DynamicScope implements Scope {
   }
   
   public <T> Provider<T> scope(final Key<T> key, final Provider<T> unscoped) {
+    System.out.println(this + ".scope(" + key + ", " + unscoped + ")");
+    
     return new Provider<T>() {
       public T get() {
         /*
@@ -35,7 +37,7 @@ public class DynamicScope implements Scope {
          * lazily created because of demand by a narrower scope. This will require
          * me to introduce explicit scope ordering.
          */
-        return DynamicScopeInstance.active().search(key, unscoped, tag);
+        return DynamicScopeInstance.active().search(key, unscoped, DynamicScope.this);
       }
     };
   }
