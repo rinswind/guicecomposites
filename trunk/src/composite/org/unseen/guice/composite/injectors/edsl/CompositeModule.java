@@ -1,4 +1,4 @@
-package org.unseen.guice.composite.injectors;
+package org.unseen.guice.composite.injectors.edsl;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
