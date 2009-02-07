@@ -1,6 +1,5 @@
 package org.unseen.guice.composite.scopes;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.util.Map;
@@ -12,7 +11,7 @@ import com.google.inject.Injector;
  */
 public class FactoryInstance implements InvocationHandler {
   /** Scope to create */
-  private final Class<? extends Annotation> scope;
+  private final DynamicScope scope;
   /** Context at which to base the new scope */
   private final DynamicScopeInstance context;
   /** Injector to crete the objects in to the new scope*/
@@ -27,7 +26,7 @@ public class FactoryInstance implements InvocationHandler {
    * @param injector
    * @param methods
    */
-  public FactoryInstance(Class<? extends Annotation> scope, DynamicScopeInstance context,
+  public FactoryInstance(DynamicScope scope, DynamicScopeInstance context,
       Injector injector, Map<Method, FactoryMethod> methods) {
     
     this.scope = scope;
@@ -36,11 +35,11 @@ public class FactoryInstance implements InvocationHandler {
     this.methods = methods;
   }
   
-  public Class<? extends Annotation> scope() {
+  public DynamicScope scope() {
     return scope;
   }
   
-  public DynamicScopeInstance context() { 
+  public DynamicScopeInstance scopeInstance() { 
     return context; 
   }
   

@@ -99,7 +99,7 @@ public class FactoryMethodImpl implements FactoryMethod {
    */
   @SuppressWarnings("unchecked")
   public Object invoke(Object proxy, FactoryInstance instance, Object[] args) throws Throwable {
-    DynamicScopeInstance active = DynamicScopeInstance.activate(instance.scope(), instance.context());
+    DynamicScopeInstance active = DynamicScopeInstance.activate(instance.scope(), instance.scopeInstance());
     try {
       int p = 0;
       for (Key<?> paramKey : params) {

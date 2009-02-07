@@ -74,10 +74,10 @@ public class FactoryProvider<F> implements Provider<F> {
   private static class ScopeChecker implements BindingScopingVisitor<Void> {
     private final String checked;
     private final Object source;
-    private final Class<? extends Annotation> expected;
+    private final DynamicScope expected;
     private final Errors errors;
     
-    public ScopeChecker(Class<? extends Annotation> expected, String checked, Object source,
+    public ScopeChecker(DynamicScope expected, String checked, Object source,
         Errors errors) {
       
       this.checked = checked;
@@ -87,14 +87,14 @@ public class FactoryProvider<F> implements Provider<F> {
     }
     
     public Void visitScopeAnnotation(Class<? extends Annotation> tag) {
-      if (expected != tag){
+      if (expected.annotation() != tag) {
         error(tag);
       }
       return null;
     }
     
     public Void visitScope(Scope scope) {
-      if (!(scope instanceof DynamicScope) || ((DynamicScope) scope).annotation() != expected){
+      if (expected != scope) {
         error(scope);
       }
       return null;
@@ -121,7 +121,7 @@ public class FactoryProvider<F> implements Provider<F> {
   private final Map<Method, FactoryMethod> methods;
   
   /** Part of the state loaded into every created factory */
-  private final Class<? extends Annotation> scope;
+  private final DynamicScope scope;
   /** Part of the state loaded into every created factory - injected later */
   private Injector injector;
   
@@ -129,7 +129,7 @@ public class FactoryProvider<F> implements Provider<F> {
    * @param binder
    * @throws ErrorsException 
    */
-  public FactoryProvider(Class<F> iface, Class<? extends Annotation> scope) {
+  public FactoryProvider(Class<F> iface, DynamicScope scope) {
     if (!iface.isInterface()) {
       throw new ConfigurationException(Arrays.asList(new Message("Only interfaces can be used for "
           + " scope factories. Found a concrete class: " + iface)));
@@ -170,7 +170,15 @@ public class FactoryProvider<F> implements Provider<F> {
     for (Map.Entry<Method, FactoryMethod> ent : methods.entrySet()) {
       try {
         binding = injector.getBinding(ent.getValue().returnType());
-        binding.acceptScopingVisitor(new ScopeChecker(this.scope, "return value", ent.getKey(), errors));
+        
+        /*
+         * If this is not an annonymous singleton dynamic scope we must validate
+         * that the user has bound all return values to the same scope as the
+         * one managed by this factory.
+         */
+        if (this.scope.annotation() != null) {
+          binding.acceptScopingVisitor(new ScopeChecker(this.scope, "return value", ent.getKey(), errors));
+        }
       } catch (ConfigurationException e) {
         errors.merge(e.getErrorMessages());
       } catch (CreationException e) {

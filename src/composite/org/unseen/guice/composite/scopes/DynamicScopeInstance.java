@@ -2,7 +2,6 @@ package org.unseen.guice.composite.scopes;
 
 import static java.util.Arrays.asList;
 
-import java.lang.annotation.Annotation;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -19,19 +18,19 @@ import com.google.inject.spi.Message;
 public class DynamicScopeInstance {
   private static final ThreadLocal<DynamicScopeInstance> ACTIVE = new ThreadLocal<DynamicScopeInstance>();
 
-  private final Class<? extends Annotation> tag;
+  private final DynamicScope scope;
   private final DynamicScopeInstance parent;
   private final Map<Key<?>, Object> cache;
   
-  private DynamicScopeInstance(Class<? extends Annotation> scope, DynamicScopeInstance parent) {
-    this.tag = scope;
+  private DynamicScopeInstance(DynamicScope scope, DynamicScopeInstance parent) {
+    this.scope = scope;
     this.parent = parent;
     this.cache = new HashMap<Key<?>, Object>();
   }
   
   @Override
   public String toString() {
-    return "DynamicScopeInstance(" + tag.getCanonicalName() + ")";
+    return "DynamicScopeInstance(" + scope + ")";
   }
   
   /**
@@ -43,8 +42,7 @@ public class DynamicScopeInstance {
    */
   public <T> void put(Key<T> key, T val) {
     if (cache.containsKey(key)) {
-      throw new CreationException(Arrays.asList(new Message(key
-          + " already ached in scope instance " + tag)));
+      throw new CreationException(Arrays.asList(new Message(key + " already ached in " + this)));
     }
     cache.put(key, val);
   }
@@ -61,10 +59,10 @@ public class DynamicScopeInstance {
    *         if we are searching for an optional scope parameter.
    */
   @SuppressWarnings("unchecked")
-  public <T> T search(Key<T> key, Provider<T> unscoped, Class<? extends Annotation> scope) {
+  public <T> T search(Key<T> key, Provider<T> unscoped, DynamicScope scope) {
     T val = null;
     
-    if (this.tag == scope) {
+    if (this.scope == scope) {
       /*
        * Must check if the cache contains the key because it might be bound to
        * null. So we can't distinguish a null value from a missing value. The
@@ -92,7 +90,7 @@ public class DynamicScopeInstance {
     } 
     else {
       throw new CreationException(asList(new Message("No cache level found for " + key
-          + " scoped as " + scope + " and searched in " + this.tag + " and it's parents")));
+          + " scoped as " + scope + " and searched in " + this.scope + " and it's parents")));
     }
 
     return val;
@@ -105,7 +103,7 @@ public class DynamicScopeInstance {
    * @param parent
    * @return
    */
-  public static DynamicScopeInstance activate(Class<? extends Annotation> scope, DynamicScopeInstance parent) {
+  public static DynamicScopeInstance activate(DynamicScope scope, DynamicScopeInstance parent) {
     if (ACTIVE.get() != null) {
       throw new CreationException(Arrays.asList(new Message(
           "A dynamic scope instance is already active in this thread: " + ACTIVE.get())));
