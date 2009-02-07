@@ -4,7 +4,7 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 import org.unseen.guice.composite.injectors.Parameter;
-import org.unseen.guice.composite.injectors.edsl.CompositeModule;
+import org.unseen.guice.composite.injectors.binder.CompositeModule;
 
 import com.google.inject.Guice;
 import com.google.inject.Inject;

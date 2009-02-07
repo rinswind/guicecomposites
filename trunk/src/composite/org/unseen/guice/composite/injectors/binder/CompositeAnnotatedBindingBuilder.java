@@ -1,4 +1,4 @@
-package org.unseen.guice.composite.injectors.edsl;
+package org.unseen.guice.composite.injectors.binder;
 
 import java.lang.annotation.Annotation;
 
