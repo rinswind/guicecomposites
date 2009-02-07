@@ -40,9 +40,9 @@ public class DynamicScopeInstance {
    * @param key
    * @param val
    */
-  public <T> void put(Key<T> key, T val) {
+  public <T> void seed(Key<T> key, T val) {
     if (cache.containsKey(key)) {
-      throw new CreationException(Arrays.asList(new Message(key + " already ached in " + this)));
+      throw new CreationException(Arrays.asList(new Message(key + " already seeded in " + this)));
     }
     cache.put(key, val);
   }
