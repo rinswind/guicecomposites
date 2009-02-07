@@ -43,9 +43,9 @@ public abstract class DynamicScopesModule implements Module {
     return binder;
   }
 
-//  protected <T> DynamicScopesLinkedBindingBuilder<T> bind(Key<T> key) {
-//    return DynamicScopes.bind(binder, key);
-//  }
+  protected <T> DynamicScopesLinkedBindingBuilder<T> bind(Key<T> key) {
+    return DynamicScopes.bind(binder, key);
+  }
 
   protected <T> DynamicScopesAnnotatedBindingBuilder<T> bind(TypeLiteral<T> typeLiteral) {
     return DynamicScopes.bind(binder, typeLiteral);
