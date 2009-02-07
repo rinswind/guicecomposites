@@ -15,32 +15,12 @@ import com.google.inject.TypeLiteral;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
 
+import static org.unseen.guice.composite.scopes.Parameters.*;
+
 /**
  * Implements a single factory method.
  */
 public class FactoryMethodImpl implements FactoryMethod {
-  private static final Parameter DEFAULT_TAG = new Parameter() {
-    public String value() {
-      return "";
-    }
-
-    public Class<? extends Annotation> annotationType() {
-      return Parameter.class;
-    }
-    
-    public String toString() {
-      return "@" + Parameter.class.getName() + "(value=)";
-    }
-    
-    public boolean equals(Object o) {
-      return o instanceof Parameter && "".equals(((Parameter) o).value());
-    }
-    
-    public int hashCode() {
-      return (127 * "value".hashCode()) ^ "".hashCode();
-    }
-  };
-
   /** The method this handler implements */
   private final Method method;
   /** The object created into the new dynamic context */
@@ -57,8 +37,9 @@ public class FactoryMethodImpl implements FactoryMethod {
   public FactoryMethodImpl(Method method) {
     this.method = method;
     
-    /* If even one key fails to be built the errors will contain the reason
-     * and an ErrorsException will be thrown out of getKey or getParamKey 
+    /*
+     * If even one key fails to be built the errors will contain the reason and
+     * an ErrorsException will be thrown out of getKey or getParamKey
      */
     Errors errors = new Errors();
     try {
@@ -80,23 +61,14 @@ public class FactoryMethodImpl implements FactoryMethod {
     }
   }
 
-  /**
-   * @see org.unseen.guice.composite.scopes.FactoryMethod#returnType()
-   */
   public Key<?> returnType() {
     return result;
   }
   
-  /**
-   * @see org.unseen.guice.composite.scopes.FactoryMethod#parameterTypes()
-   */
   public List<Key<?>> parameterTypes() {
     return params;
   }
 
-  /**
-   * @see org.unseen.guice.composite.scopes.FactoryMethod#invoke(org.unseen.guice.composite.scopes.FactoryInstance, java.lang.Object[])
-   */
   @SuppressWarnings("unchecked")
   public Object invoke(Object proxy, FactoryInstance instance, Object[] args) throws Throwable {
     DynamicScopeInstance active = DynamicScopeInstance.activate(instance.scope(), instance.scopeInstance());
@@ -107,8 +79,9 @@ public class FactoryMethodImpl implements FactoryMethod {
       }
       
       /*
-       * If scope factories need to be created to satisfy this instantiation
-       * they will capture the scope instance we have activated just now.
+       * If nested scope factories need to be created to satisfy this
+       * instantiation they will capture the scope instance we have activated
+       * just now.
        */
       return instance.injector().getInstance(result);
     } catch (ProvisionException e) {
@@ -139,7 +112,7 @@ public class FactoryMethodImpl implements FactoryMethod {
     Class<? extends Annotation> tag = key.getAnnotationType();
     
     if (tag == null) {
-      return Key.get(key.getTypeLiteral(), DEFAULT_TAG);
+      return Key.get(key.getTypeLiteral(), parameter(""));
     }
 
     if (tag == Parameter.class) {

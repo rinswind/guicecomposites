@@ -6,6 +6,7 @@ import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNull;
+import static junit.framework.Assert.assertNotNull;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
@@ -16,9 +17,12 @@ import org.unseen.guice.composite.scopes.binder.DynamicScopesModule;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+import com.google.inject.Key;
 import com.google.inject.ProvisionException;
 import com.google.inject.ScopeAnnotation;
 import com.google.inject.internal.Nullable;
+
+import static org.unseen.guice.composite.scopes.Parameters.*;
 
 public class ParameterTests {
   @ScopeAnnotation
@@ -86,5 +90,18 @@ public class ParameterTests {
     
     ParameterizedFactory fact = inj.getInstance(ParameterizedFactory.class);
     fact.create(null, "b");
+  }
+  
+  public void testParameterBindings() {
+    Injector inj = createInjector(new DynamicScopesModule() {
+      @Override
+      protected void configure() {
+        bind(ParameterizedFactory.class).toDynamicScope(ParameterizedScope.class);
+        bind(Parameterized.class).in(ParameterizedScope.class);
+      }
+    });
+    
+    assertNotNull(inj.getBinding(Key.get(String.class, parameter("a"))));
+    assertNotNull(inj.getBinding(Key.get(String.class, parameter("b"))));
   }
 }
