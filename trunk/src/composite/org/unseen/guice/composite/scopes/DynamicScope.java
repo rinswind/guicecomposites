@@ -27,8 +27,6 @@ public class DynamicScope implements Scope {
   }
   
   public <T> Provider<T> scope(final Key<T> key, final Provider<T> unscoped) {
-    System.out.println(this + ".scope(" + key + ", " + unscoped + ")");
-    
     return new Provider<T>() {
       public T get() {
         /*

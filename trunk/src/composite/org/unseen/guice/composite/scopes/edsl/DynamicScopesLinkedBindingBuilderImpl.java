@@ -91,8 +91,6 @@ public class DynamicScopesLinkedBindingBuilderImpl<T> implements DynamicScopesLi
     
     /* Process the returns */
     for (Key returnKey : returns) {
-      System.out.println("binding " + returnKey + " to " + impl);
-      
       privBinder.bind(returnKey).to(impl).in(scope);
       privBinder.expose(returnKey);
     }
