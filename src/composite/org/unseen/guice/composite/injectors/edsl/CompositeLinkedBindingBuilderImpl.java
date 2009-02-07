@@ -1,7 +1,9 @@
-package org.unseen.guice.composite.injectors;
+package org.unseen.guice.composite.injectors.edsl;
 
 import java.lang.annotation.Annotation;
 import java.util.Arrays;
+
+import org.unseen.guice.composite.injectors.CompositeProvider;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Key;

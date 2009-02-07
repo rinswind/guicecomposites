@@ -1,4 +1,4 @@
-package org.unseen.guice.composite.injectors;
+package org.unseen.guice.composite.injectors.edsl;
 
 import com.google.inject.Module;
 import com.google.inject.binder.LinkedBindingBuilder;
