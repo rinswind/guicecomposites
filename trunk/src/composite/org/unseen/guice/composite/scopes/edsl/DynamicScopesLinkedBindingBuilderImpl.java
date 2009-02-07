@@ -49,12 +49,13 @@ public class DynamicScopesLinkedBindingBuilderImpl<T> implements DynamicScopesLi
     /* Bind the scope */
     binder.bindScope(tag, scope);
     
-    /* Bind providers for the common set of factory parameters */
+    /* Merge the parameters into a unique set */
     Set<Key<?>> params = new HashSet<Key<?>>();
     for (FactoryMethod method : factory.methodSuite().values()) {
       params.addAll(method.parameterTypes());
     }
     
+    /* Bind the parameters into the user-defined dynamic scope */
     for (Key<?> paramKey : params) {
       /*
        * All factory parameters are by default null if not overridden by values
@@ -81,7 +82,7 @@ public class DynamicScopesLinkedBindingBuilderImpl<T> implements DynamicScopesLi
     DynamicScope scope = new DynamicScope(null);
     FactoryProvider<T> factory = new FactoryProvider<T>(iface, scope);
     
-    /* Collect the unique sets of parameters and return types */
+    /* Merge all parameters and return values into two unique sets */
     Set<Key<?>> params = new HashSet<Key<?>>();
     Set<Key<?>> returns = new HashSet<Key<?>>();
     for (FactoryMethod method : factory.methodSuite().values()) {
@@ -89,18 +90,14 @@ public class DynamicScopesLinkedBindingBuilderImpl<T> implements DynamicScopesLi
       params.addAll(method.parameterTypes());
     }
     
-    /* Process the returns */
+    /* Bind the return values into the anonymous scope and expose them */
     for (Key returnKey : returns) {
       privBinder.bind(returnKey).to(impl).in(scope);
       privBinder.expose(returnKey);
     }
     
-    /* Process the parameters */
+    /* Bind the parameters into the anonymous scope */
     for (Key paramKey : params) {
-      /*
-       * All factory parameters are by default null if not overridden by values
-       * cached from a factory method arguments.
-       */
       privBinder.bind(paramKey).toProvider(Providers.of(null)).in(scope);
     }
     
