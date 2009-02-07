@@ -1,14 +1,18 @@
 package org.unseen.guice.composite.scopes.test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 import org.unseen.guice.composite.scopes.Parameter;
+import org.unseen.guice.composite.scopes.Parameters;
 import org.unseen.guice.composite.scopes.binder.DynamicScopesModule;
 
+import com.google.inject.ConfigurationException;
 import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+import com.google.inject.Key;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
 
@@ -42,7 +46,7 @@ public class CurriedConstructorTest {
   }
   
   @Test
-  public void test() {
+  public void testConstructors() {
     Injector inj = Guice.createInjector(new DynamicScopesModule() {
       @Override
       protected void configure() {
@@ -63,5 +67,18 @@ public class CurriedConstructorTest {
     
     assertEquals("one", b2.one());
     assertEquals(666, b2.two());
+  }
+  
+  @Test(expected = ConfigurationException.class)
+  public void testPrivateParameters() {
+    Injector inj = Guice.createInjector(new DynamicScopesModule() {
+      @Override
+      protected void configure() {
+        bind(BoxFactory.class).toSingletonDynamicScope(BoxImpl.class);
+        bindConstant().annotatedWith(Names.named("one")).to("one");
+      }
+    });
+    
+    inj.getBinding(Key.get(Integer.class, Parameters.parameter("")));
   }
 }
