@@ -19,19 +19,19 @@ import com.google.inject.spi.Message;
 public class DynamicScopeInstance {
   private static final ThreadLocal<DynamicScopeInstance> ACTIVE = new ThreadLocal<DynamicScopeInstance>();
 
-  private final Class<? extends Annotation> scope;
+  private final Class<? extends Annotation> tag;
   private final DynamicScopeInstance parent;
   private final Map<Key<?>, Object> cache;
   
   private DynamicScopeInstance(Class<? extends Annotation> scope, DynamicScopeInstance parent) {
-    this.scope = scope;
+    this.tag = scope;
     this.parent = parent;
     this.cache = new HashMap<Key<?>, Object>();
   }
   
   @Override
   public String toString() {
-    return "DynamicScopeInstance[ " + scope.getSimpleName() + " ]";
+    return "DynamicScopeInstance(" + tag.getCanonicalName() + ")";
   }
   
   /**
@@ -44,26 +44,27 @@ public class DynamicScopeInstance {
   public <T> void put(Key<T> key, T val) {
     if (cache.containsKey(key)) {
       throw new CreationException(Arrays.asList(new Message(key
-          + " already ached in scope instance " + scope)));
+          + " already ached in scope instance " + tag)));
     }
     cache.put(key, val);
   }
-  
+
   /**
-   * Searches for a cached object. If it fails to find it creates a new one and caches it 
-   * at the appropriate scope level.
+   * Searches for a cached object. If it fails to find it creates a new one and
+   * caches it at the appropriate scope level.
    * 
    * @param <T>
    * @param key
    * @param unscoped
    * @param scope
-   * @return
+   * @return the value of the key in the current scope instance. Can return null
+   *         if we are searching for an optional scope parameter.
    */
   @SuppressWarnings("unchecked")
-  public <T, S extends Annotation> T search(Key<T> key, Provider<T> unscoped, Class<S> scope) {
+  public <T> T search(Key<T> key, Provider<T> unscoped, Class<? extends Annotation> scope) {
     T val = null;
     
-    if (this.scope == scope) {
+    if (this.tag == scope) {
       /*
        * Must check if the cache contains the key because it might be bound to
        * null. So we can't distinguish a null value from a missing value. The
@@ -91,7 +92,7 @@ public class DynamicScopeInstance {
     } 
     else {
       throw new CreationException(asList(new Message("No cache level found for " + key
-          + " scoped as " + scope + " and searched in " + this.scope + " and it's parents")));
+          + " scoped as " + scope + " and searched in " + this.tag + " and it's parents")));
     }
 
     return val;
