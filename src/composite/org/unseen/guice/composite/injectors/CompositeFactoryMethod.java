@@ -8,6 +8,8 @@ import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.List;
 
+import org.unseen.guice.composite.Parameter;
+
 import com.google.inject.AbstractModule;
 import com.google.inject.Binder;
 import com.google.inject.Binding;
@@ -19,38 +21,12 @@ import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
 import com.google.inject.util.Providers;
 
+import static org.unseen.guice.composite.Parameters.*;
+
 /**
  * Implements a single factory method.
  */
 public class CompositeFactoryMethod {
-  /**
-   * If a factory method parameter isn't annotated, it gets this annotation.
-   */
-  private static final Parameter DEFAULT_ANNOTATION = new Parameter() {
-    public String value() {
-      return "";
-    }
-
-    public Class<? extends Annotation> annotationType() {
-      return Parameter.class;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-      return o instanceof Parameter && ((Parameter) o).value().equals("");
-    }
-
-    @Override
-    public int hashCode() {
-      return 127 * "value".hashCode() ^ "".hashCode();
-    }
-
-    @Override
-    public String toString() {
-      return "@" + Parameter.class.getName() + "(value=)";
-    }
-  };
-  
   private final Method method;
   private final Key<?> result;
   private final List<Key<?>> params;
@@ -121,7 +97,7 @@ public class CompositeFactoryMethod {
     Class<? extends Annotation> annotation = key.getAnnotationType();
     
     if (annotation == null) {
-      return Key.get(key.getTypeLiteral(), DEFAULT_ANNOTATION);
+      return Key.get(key.getTypeLiteral(), parameter(""));
     }
 
     if (annotation == Parameter.class) {

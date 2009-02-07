@@ -4,8 +4,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
-import org.unseen.guice.composite.scopes.Parameter;
-import org.unseen.guice.composite.scopes.Parameters;
+import org.unseen.guice.composite.Parameter;
+import org.unseen.guice.composite.Parameters;
 import org.unseen.guice.composite.scopes.binder.DynamicScopesModule;
 
 import com.google.inject.ConfigurationException;
