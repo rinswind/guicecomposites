@@ -20,9 +20,9 @@ public class DynamicScopes {
     return new DynamicScopesAnnotatedBindingBuilderImpl<T>(Key.get(key), binder.bind(key), binder);
   }
 
-//  public static <T> DynamicScopesAnnotatedBindingBuilder<T> bind(Binder binder, Key<T> key) {
-//    return new DynamicScopesAnnotatedBindingBuilderImpl<T>(key, binder.bind(key), binder);
-//  }
+  public static <T> DynamicScopesLinkedBindingBuilder<T> bind(Binder binder, Key<T> key) {
+    return new DynamicScopesLinkedBindingBuilderImpl<T>(key, binder.bind(key), binder);
+  }
   
   /**
    * @param <S>
