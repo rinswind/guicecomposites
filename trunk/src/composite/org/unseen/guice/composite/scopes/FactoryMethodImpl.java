@@ -103,7 +103,7 @@ public class FactoryMethodImpl implements FactoryMethod {
     try {
       int p = 0;
       for (Key<?> paramKey : params) {
-        active.put((Key) paramKey, args[p++]);
+        active.seed((Key) paramKey, args[p++]);
       }
       
       /*
