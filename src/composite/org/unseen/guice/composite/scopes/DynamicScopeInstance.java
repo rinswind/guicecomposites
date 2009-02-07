@@ -66,8 +66,9 @@ public class DynamicScopeInstance {
     if (this.scope == scope) {
       /*
        * Must check if the cache contains the key because it might be bound to
-       * null. The other way to support null parameters would be to box all
-       * cached objects in a container that can also be empty
+       * null. So we can't distinguish a null value from a missing value. The
+       * other way to support null parameters would be to box all cached objects
+       * in a container that can also be empty
        */
       if (cache.containsKey(key)) {
         val = (T) cache.get(key);
@@ -75,8 +76,12 @@ public class DynamicScopeInstance {
         val = unscoped.get();
         
         /*
-         * In case of cycles a proxy to val has already been cached. So we sould
-         * override the proxy with itself - no harm done.
+         * In case of cycles val would be a proxy. This proxy would be created
+         * when the recursion loops into a search() call to this object and
+         * Guice detects we try to create val while already the creation of val
+         * is in progress. At that point val will be cached by the looped
+         * search() call and than returned to us. Here we will cached it again -
+         * no harm done.
          */
         cache.put(key, val);
       } 
@@ -102,7 +107,7 @@ public class DynamicScopeInstance {
   public static DynamicScopeInstance activate(Class<? extends Annotation> scope, DynamicScopeInstance parent) {
     if (ACTIVE.get() != null) {
       throw new CreationException(Arrays.asList(new Message(
-          "A DynamicScopeInstance is already active in this thread: " + ACTIVE.get())));
+          "A dynamic scope instance is already active in this thread: " + ACTIVE.get())));
     }
     
     DynamicScopeInstance ctx = new DynamicScopeInstance(scope, parent);

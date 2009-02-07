@@ -12,8 +12,8 @@ import java.lang.annotation.Target;
 import java.net.Socket;
 
 import org.junit.Test;
-import org.unseen.guice.composite.scopes.DynamicScopesModule;
 import org.unseen.guice.composite.scopes.Parameter;
+import org.unseen.guice.composite.scopes.edsl.DynamicScopesModule;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;

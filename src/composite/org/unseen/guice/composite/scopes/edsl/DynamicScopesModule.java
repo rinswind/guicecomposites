@@ -1,4 +1,4 @@
-package org.unseen.guice.composite.scopes;
+package org.unseen.guice.composite.scopes.edsl;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
