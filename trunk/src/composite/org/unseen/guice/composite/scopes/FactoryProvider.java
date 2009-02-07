@@ -5,12 +5,9 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
-import com.google.inject.Binder;
 import com.google.inject.Binding;
 import com.google.inject.ConfigurationException;
 import com.google.inject.CreationException;
@@ -23,7 +20,6 @@ import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
 import com.google.inject.spi.BindingScopingVisitor;
 import com.google.inject.spi.Message;
-import com.google.inject.util.Providers;
 
 /**
  * @author Todor Boev
@@ -130,12 +126,10 @@ public class FactoryProvider<F> implements Provider<F> {
   private Injector injector;
   
   /**
-   * @param iface interface of the factory
-   * @param scope the scope of which this factory creates instances.
    * @param binder
    * @throws ErrorsException 
    */
-  public FactoryProvider(Class<F> iface, Class<? extends Annotation> scope, Binder binder) {
+  public FactoryProvider(Class<F> iface, Class<? extends Annotation> scope) {
     if (!iface.isInterface()) {
       throw new ConfigurationException(Arrays.asList(new Message("Only interfaces can be used for "
           + " scope factories. Found a concrete class: " + iface)));
@@ -151,26 +145,15 @@ public class FactoryProvider<F> implements Provider<F> {
         methods.put(method, new FactoryMethodImpl(method));
       }
     }
-    
-    bindParameterSet(scope, binder);
   }
 
-  @SuppressWarnings("unchecked")
-  private void bindParameterSet(Class<? extends Annotation> scope, Binder binder) {
-    Set<Key<?>> params = new HashSet<Key<?>>();
-    for (FactoryMethod method : methods.values()) {
-      params.addAll(method.parameterTypes());
-    }
-    
-    for (Key<?> paramKey : params) {
-      /*
-       * All factory parameters are by default null if not overridden by values
-       * cached from a factory method arguments.
-       */
-      binder.bind(paramKey).toProvider((Provider) Providers.of(null)).in(scope);
-    }
+  /**
+   * @return
+   */
+  public Map<Method, FactoryMethod> methodSuite() {
+    return methods;
   }
-
+  
   /**
    * At injector-creation time, validate the the factory method suite.
    */

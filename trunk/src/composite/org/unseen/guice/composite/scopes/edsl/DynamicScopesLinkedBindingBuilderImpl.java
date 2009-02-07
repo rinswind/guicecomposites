@@ -1,6 +1,12 @@
-package org.unseen.guice.composite.scopes;
+package org.unseen.guice.composite.scopes.edsl;
 
 import java.lang.annotation.Annotation;
+import java.util.HashSet;
+import java.util.Set;
+
+import org.unseen.guice.composite.scopes.DynamicScope;
+import org.unseen.guice.composite.scopes.FactoryMethod;
+import org.unseen.guice.composite.scopes.FactoryProvider;
 
 import com.google.inject.Binder;
 import com.google.inject.Key;
@@ -10,6 +16,7 @@ import com.google.inject.ScopeAnnotation;
 import com.google.inject.TypeLiteral;
 import com.google.inject.binder.LinkedBindingBuilder;
 import com.google.inject.binder.ScopedBindingBuilder;
+import com.google.inject.util.Providers;
 
 /**
  * @author Todor Boev
@@ -32,8 +39,30 @@ public class DynamicScopesLinkedBindingBuilderImpl<T> implements DynamicScopesLi
       throw new IllegalArgumentException(tag + " is not a scope annotation");
     }
     
+    Class<T> iface = (Class<T>) key.getTypeLiteral().getRawType();
+    
+    /* Bind a new scope instance for this factory */
     binder.bindScope(tag, new DynamicScope(tag));
-    return wrapped.toProvider(new FactoryProvider(key.getTypeLiteral().getRawType(), tag, binder));
+    
+    /* Create the factory */
+    FactoryProvider<T> factory = new FactoryProvider<T>(iface, tag);
+    
+    /* Bind providers for the common set of factory parameters */
+    Set<Key<?>> params = new HashSet<Key<?>>();
+    for (FactoryMethod method : factory.methodSuite().values()) {
+      params.addAll(method.parameterTypes());
+    }
+    
+    for (Key<?> paramKey : params) {
+      /*
+       * All factory parameters are by default null if not overridden by values
+       * cached from a factory method arguments.
+       */
+      binder.bind(paramKey).toProvider((Provider) Providers.of(null)).in(tag);
+    }
+    
+    /* Finally bind the factory itself and continue the DSL */
+    return wrapped.toProvider(factory);
   }
   
 //  @SuppressWarnings("unchecked")
@@ -42,10 +71,6 @@ public class DynamicScopesLinkedBindingBuilderImpl<T> implements DynamicScopesLi
 //    
 //    Key implKey = Key.get(impl);
 //    
-//    /* FIX must analyze all the methods of the factory and bind the impl 
-//     * only to their products. Must make sure all the products return
-//     * types compatible with the impl class.
-//     */
 //    privBinder.bind(implKey);
 //    privBinder.expose(implKey);
 //    
