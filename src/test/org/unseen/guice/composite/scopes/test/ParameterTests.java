@@ -12,7 +12,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 import org.junit.Test;
-import org.unseen.guice.composite.Arg;
+import org.unseen.guice.composite.scopes.Arg;
 import org.unseen.guice.composite.scopes.binder.DynamicScopesModule;
 
 import com.google.inject.Inject;
@@ -22,7 +22,7 @@ import com.google.inject.ProvisionException;
 import com.google.inject.ScopeAnnotation;
 import com.google.inject.internal.Nullable;
 
-import static org.unseen.guice.composite.Args.*;
+import static org.unseen.guice.composite.scopes.Args.*;
 
 public class ParameterTests {
   @ScopeAnnotation

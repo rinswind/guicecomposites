@@ -1,9 +1,9 @@
 package org.unseen.guice.composite.injectors.test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
-import org.unseen.guice.composite.Arg;
+import org.unseen.guice.composite.injectors.Arg;
 import org.unseen.guice.composite.injectors.binder.CompositeModule;
 
 import com.google.inject.Guice;

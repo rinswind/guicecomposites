@@ -1,4 +1,4 @@
-package org.unseen.guice.composite;
+package org.unseen.guice.composite.scopes;
 
 import static java.lang.annotation.ElementType.PARAMETER;
 import static java.lang.annotation.ElementType.FIELD;

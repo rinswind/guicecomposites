@@ -1,6 +1,5 @@
 package org.unseen.guice.composite.injectors;
 
-
 import java.util.Arrays;
 
 import com.google.inject.ConfigurationException;
