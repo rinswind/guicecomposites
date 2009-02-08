@@ -14,7 +14,7 @@ public class FactoryInstance implements InvocationHandler {
   private final DynamicScope scope;
   /** Context at which to base the new scope */
   private final DynamicScopeInstance context;
-  /** Injector to crete the objects in to the new scope*/
+  /** Injector to create the objects in to the new scope */
   private final Injector injector;
   
   /** Method suite */
