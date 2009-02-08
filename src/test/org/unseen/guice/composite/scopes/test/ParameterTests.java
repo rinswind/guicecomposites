@@ -32,7 +32,9 @@ public class ParameterTests {
   }
   
   interface ParameterizedFactory {
-    Parameterized create(@Arg("a") String a, @Arg("b") String b);
+    Parameterized create(
+        @Arg(name="a", value=ParameterizedScope.class) String a, 
+        @Arg(name="b", value=ParameterizedScope.class) String b);
   }
   
   public static class Parameterized {
@@ -40,7 +42,9 @@ public class ParameterTests {
     final String b;
     
     @Inject     
-    public Parameterized(@Arg("a") String a, @Nullable @Arg("b") String b) {
+    public Parameterized(
+        @Arg(name="a", value=ParameterizedScope.class) String a, 
+        @Nullable @Arg(name="b", value=ParameterizedScope.class) String b) {
       this.a = a;
       this.b = b;
     }
@@ -101,7 +105,7 @@ public class ParameterTests {
       }
     });
     
-    assertNotNull(inj.getBinding(Key.get(String.class, arg("a"))));
-    assertNotNull(inj.getBinding(Key.get(String.class, arg("b"))));
+    assertNotNull(inj.getBinding(Key.get(String.class, arg(ParameterizedScope.class, "a"))));
+    assertNotNull(inj.getBinding(Key.get(String.class, arg(ParameterizedScope.class, "b"))));
   }
 }

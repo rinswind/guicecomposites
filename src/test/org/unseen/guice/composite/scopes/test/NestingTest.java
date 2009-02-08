@@ -50,7 +50,7 @@ public class NestingTest {
   }
   
   public interface ConnectionFactory {
-    Connection create(Socket sock);
+    Connection create(@Arg(ConnectionScoped.class) Socket sock);
   }
   
   public interface Connection {
@@ -62,7 +62,7 @@ public class NestingTest {
   }
   
   public interface RequestFactory {
-    Request create(String header);
+    Request create(@Arg(RequestScoped.class) String header);
   }
   
   public interface Request {
@@ -95,7 +95,7 @@ public class NestingTest {
     private final RequestFactory requests;
     
     @Inject 
-    public ConnectionImpl(@Arg Socket sock, Server server, RequestFactory requests) {
+    public ConnectionImpl(@Arg(ConnectionScoped.class) Socket sock, Server server, RequestFactory requests) {
       this.sock = sock;
       this.server = server;
       this.requests = requests;
@@ -120,7 +120,7 @@ public class NestingTest {
     private final Response resp;
     
     @Inject
-    public RequestImpl(@Arg String header, Connection conn, Response resp) {
+    public RequestImpl(@Arg(RequestScoped.class) String header, Connection conn, Response resp) {
       this.header = header;
       this.conn = conn;
       this.resp = resp;

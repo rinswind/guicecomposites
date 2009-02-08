@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
+import org.unseen.guice.composite.scopes.AnonymousScope;
 import org.unseen.guice.composite.scopes.Arg;
 import org.unseen.guice.composite.scopes.Args;
 import org.unseen.guice.composite.scopes.binder.DynamicScopesModule;
@@ -79,6 +80,6 @@ public class CurriedConstructorTest {
       }
     });
     
-    inj.getBinding(Key.get(Integer.class, Args.arg("")));
+    inj.getBinding(Key.get(Integer.class, Args.arg(AnonymousScope.class, "")));
   }
 }

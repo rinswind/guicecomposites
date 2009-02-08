@@ -135,7 +135,7 @@ public class FactoryProvider<F> implements Provider<F> {
 
     for (Class<?> cl = iface; cl != null; cl = iface.getSuperclass()) {
       for (Method method : cl.getMethods()) {
-        methods.put(method, new FactoryMethodImpl(method));
+        methods.put(method, new FactoryMethodImpl(method, scope));
       }
     }
   }
