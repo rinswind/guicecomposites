@@ -42,7 +42,7 @@ public class ValidationTests {
     createInjector(new DynamicScopesModule() {
       @Override
       protected void configure() {
-        bind(DependentFactory.class).toDynamicScope(TestScoped.class);
+        bind(DependentFactory.class).toScope(TestScoped.class);
         bind(Dependent.class).in(TestScoped.class);
       }
     });
@@ -53,7 +53,7 @@ public class ValidationTests {
     createInjector(new DynamicScopesModule() {
       @Override
       protected void configure() {
-        bind(DependentFactory.class).toDynamicScope(TestScoped.class);
+        bind(DependentFactory.class).toScope(TestScoped.class);
         bind(Dependency.class).to(DependencyImpl.class).in(TestScoped.class);
         bind(Dependent.class).in(Singleton.class);
       }
@@ -65,7 +65,7 @@ public class ValidationTests {
     createInjector(new DynamicScopesModule() {
       @Override
       protected void configure() {
-        bind(DependentFactory.class).toDynamicScope(TestScoped.class);
+        bind(DependentFactory.class).toScope(TestScoped.class);
         bind(Dependency.class).to(DependencyImpl.class).in(TestScoped.class);
         bind(Dependent.class).in(TestScoped.class);
       }

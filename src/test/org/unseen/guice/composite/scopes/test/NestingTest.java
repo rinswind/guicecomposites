@@ -164,15 +164,15 @@ public class NestingTest {
       @Override
       protected void configure() {
         /* The ServerFactory lives in no scope and creates ServerScoped */
-        bind(ServerFactory.class).toDynamicScope(ServerScoped.class);
+        bind(ServerFactory.class).toScope(ServerScoped.class);
         bind(Server.class).to(ServerImpl.class).in(ServerScoped.class);
         
         /* The ConnectionFactory lives in ServerScoped but creates ConnectionScoped */
-        bind(ConnectionFactory.class).toDynamicScope(ConnectionScoped.class).in(ServerScoped.class);
+        bind(ConnectionFactory.class).toScope(ConnectionScoped.class).in(ServerScoped.class);
         bind(Connection.class).to(ConnectionImpl.class).in(ConnectionScoped.class);
         
         /* The request factory lives in ConnectionScoped and creates RequestScoped */
-        bind(RequestFactory.class).toDynamicScope(RequestScoped.class).in(ConnectionScoped.class);
+        bind(RequestFactory.class).toScope(RequestScoped.class).in(ConnectionScoped.class);
         bind(Request.class).to(RequestImpl.class).in(RequestScoped.class);
         bind(Response.class).to(ResponseImpl.class).in(RequestScoped.class);
       }
