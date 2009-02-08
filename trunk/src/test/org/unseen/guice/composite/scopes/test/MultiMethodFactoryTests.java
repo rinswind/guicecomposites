@@ -9,7 +9,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 import org.junit.Test;
-import org.unseen.guice.composite.Parameter;
+import org.unseen.guice.composite.Arg;
 import org.unseen.guice.composite.scopes.binder.DynamicScopesModule;
 
 import com.google.inject.Guice;
@@ -37,7 +37,7 @@ public class MultiMethodFactoryTests {
     final Integer num;
     
     @Inject
-    public IntegerBox(@Nullable @Parameter Integer num) {
+    public IntegerBox(@Nullable @Arg Integer num) {
       this.num = num;
     }
   }
@@ -46,7 +46,7 @@ public class MultiMethodFactoryTests {
     final String str;
     
     @Inject
-    public StringBox(@Nullable @Parameter String str) {
+    public StringBox(@Nullable @Arg String str) {
       this.str = str;
     }
   }

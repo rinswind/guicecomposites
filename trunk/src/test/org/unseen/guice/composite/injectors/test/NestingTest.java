@@ -6,7 +6,7 @@ import static junit.framework.Assert.assertTrue;
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
-import org.unseen.guice.composite.Parameter;
+import org.unseen.guice.composite.Arg;
 import org.unseen.guice.composite.injectors.binder.CompositeModule;
 
 import com.google.inject.AbstractModule;
@@ -19,7 +19,7 @@ public class NestingTest {
   }
   
   public interface ConnectionFactory {
-    Connection create(@Parameter("host") String host);
+    Connection create(@Arg("host") String host);
   }
   
   public interface Connection {
@@ -29,7 +29,7 @@ public class NestingTest {
   }
   
   public interface RequestFactory {
-    Request create(@Parameter("parameter") String parameter);
+    Request create(@Arg("parameter") String parameter);
   }
   
   public interface Request {
@@ -62,7 +62,7 @@ public class NestingTest {
     private final RequestFactory requests;
     
     @Inject 
-    public ConnectionImpl(@Parameter("host") String host, Server server, RequestFactory requests) {
+    public ConnectionImpl(@Arg("host") String host, Server server, RequestFactory requests) {
       this.host = host;
       this.server = server;
       this.requests = requests;
@@ -92,7 +92,7 @@ public class NestingTest {
     private final Response resp;
     
     @Inject
-    public RequestImpl(@Parameter("parameter") String parameter, Connection conn, Response resp) {
+    public RequestImpl(@Arg("parameter") String parameter, Connection conn, Response resp) {
       this.parameter = parameter;
       this.conn = conn;
       this.resp = resp;

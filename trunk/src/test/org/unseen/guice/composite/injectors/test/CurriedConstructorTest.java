@@ -3,7 +3,7 @@ package org.unseen.guice.composite.injectors.test;
 import static org.junit.Assert.*;
 
 import org.junit.Test;
-import org.unseen.guice.composite.Parameter;
+import org.unseen.guice.composite.Arg;
 import org.unseen.guice.composite.injectors.binder.CompositeModule;
 
 import com.google.inject.Guice;
@@ -27,7 +27,7 @@ public class CurriedConstructorTest {
     private final int two;
     
     @Inject
-    public BoxImpl(@Named("one") String one, @Parameter int two) {
+    public BoxImpl(@Named("one") String one, @Arg int two) {
       this.one = one;
       this.two = two;
     }

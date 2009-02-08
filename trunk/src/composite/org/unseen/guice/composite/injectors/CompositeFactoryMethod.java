@@ -8,7 +8,7 @@ import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.List;
 
-import org.unseen.guice.composite.Parameter;
+import org.unseen.guice.composite.Arg;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Binder;
@@ -21,7 +21,7 @@ import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
 import com.google.inject.util.Providers;
 
-import static org.unseen.guice.composite.Parameters.*;
+import static org.unseen.guice.composite.Args.*;
 
 /**
  * Implements a single factory method.
@@ -97,10 +97,10 @@ public class CompositeFactoryMethod {
     Class<? extends Annotation> annotation = key.getAnnotationType();
     
     if (annotation == null) {
-      return Key.get(key.getTypeLiteral(), parameter(""));
+      return Key.get(key.getTypeLiteral(), arg(""));
     }
 
-    if (annotation == Parameter.class) {
+    if (annotation == Arg.class) {
       return key;
     }
 

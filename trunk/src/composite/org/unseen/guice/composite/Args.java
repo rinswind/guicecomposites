@@ -8,14 +8,14 @@ import java.lang.annotation.Annotation;
  * 
  * @author Todor Boev
  */
-public class Parameters {
-  private Parameters() {
+public class Args {
+  private Args() {
   }
   
-  private static class ParameterImpl implements Parameter {
+  private static class ArgImpl implements Arg {
     private final String name;
     
-    public ParameterImpl(String name) {
+    public ArgImpl(String name) {
       this.name = name;
     }
     
@@ -24,15 +24,15 @@ public class Parameters {
     }
 
     public Class<? extends Annotation> annotationType() {
-      return Parameter.class;
+      return Arg.class;
     }
     
     public String toString() {
-      return "@" + Parameter.class.getName() + "(value=" + name + ")";
+      return "@" + Arg.class.getName() + "(value=" + name + ")";
     }
     
     public boolean equals(Object o) {
-      return o instanceof Parameter && name.equals(((Parameter) o).value());
+      return o instanceof Arg && name.equals(((Arg) o).value());
     }
     
     public int hashCode() {
@@ -40,9 +40,9 @@ public class Parameters {
     }
   }
   
-  private static Parameter DEFAULT = new ParameterImpl("");
+  private static Arg DEFAULT = new ArgImpl("");
   
-  public static Parameter parameter(String name) {
-    return (name != null && name.length() > 0) ? new ParameterImpl(name) : DEFAULT;
+  public static Arg arg(String name) {
+    return (name != null && name.length() > 0) ? new ArgImpl(name) : DEFAULT;
   }
 }

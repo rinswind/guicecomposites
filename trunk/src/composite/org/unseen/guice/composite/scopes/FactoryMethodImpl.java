@@ -8,7 +8,7 @@ import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.List;
 
-import org.unseen.guice.composite.Parameter;
+import org.unseen.guice.composite.Arg;
 
 import com.google.inject.ConfigurationException;
 import com.google.inject.Key;
@@ -17,7 +17,7 @@ import com.google.inject.TypeLiteral;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
 
-import static org.unseen.guice.composite.Parameters.*;
+import static org.unseen.guice.composite.Args.*;
 
 /**
  * Implements a single factory method.
@@ -108,10 +108,10 @@ public class FactoryMethodImpl implements FactoryMethod {
     Class<? extends Annotation> tag = key.getAnnotationType();
     
     if (tag == null) {
-      return Key.get(key.getTypeLiteral(), parameter(""));
+      return Key.get(key.getTypeLiteral(), arg(""));
     }
 
-    if (tag == Parameter.class) {
+    if (tag == Arg.class) {
       return key;
     }
 
