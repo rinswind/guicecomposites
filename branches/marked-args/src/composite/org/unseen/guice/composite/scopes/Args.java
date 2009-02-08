@@ -13,36 +13,58 @@ public class Args {
   }
   
   private static class ArgImpl implements Arg {
+    private final Class<? extends Annotation> value;
     private final String name;
     
-    public ArgImpl(String name) {
+    public ArgImpl(Class<? extends Annotation> value, String name) {
+      this.value = value;
       this.name = name;
     }
     
-    public String value() {
-      return "";
+    public Class<? extends Annotation> value() {
+      return value;
     }
 
+    public String name() {
+      return name;
+    }
+    
     public Class<? extends Annotation> annotationType() {
       return Arg.class;
     }
     
     public String toString() {
-      return "@" + Arg.class.getName() + "(value=" + name + ")";
+      return "@" + Arg.class.getName() + "(value=" + value + ", name=" + name + ")";
     }
     
     public boolean equals(Object o) {
-      return o instanceof Arg && name.equals(((Arg) o).value());
+      if (!(o instanceof Arg)) {
+        return false;
+      }
+      
+      Arg other = (Arg) o;
+      return value.equals(other.value()) && name.equals(other.name());
     }
     
     public int hashCode() {
-      return (127 * "value".hashCode()) ^ name.hashCode();
+      return (127 * "value".hashCode()) ^ value.hashCode() + 
+             (127 * "name".hashCode()) ^ name.hashCode();
     }
   }
   
-  private static Arg DEFAULT = new ArgImpl("");
+  public static Arg arg(Class<? extends Annotation> value) {
+    return arg(value, "");
+  }
   
-  public static Arg arg(String name) {
-    return (name != null && name.length() > 0) ? new ArgImpl(name) : DEFAULT;
+  public static Arg arg(Class<? extends Annotation> value, String name) {
+    if (value == null) {
+      value = AnonymousScope.class;
+    }
+      
+    if (name == null) {
+      name = "";
+    }
+    
+    return new ArgImpl(value, name);
   }
 }

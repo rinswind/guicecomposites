@@ -29,7 +29,7 @@ public class FactoryMethodImpl implements FactoryMethod {
   /** The parameters passed into the new dynamic context */
   private final List<Key<?>> params;
   
-  public FactoryMethodImpl(Method method) {
+  public FactoryMethodImpl(Method method, DynamicScope scope) {
     this.method = method;
     
     /*
@@ -46,8 +46,10 @@ public class FactoryMethodImpl implements FactoryMethod {
       Type[] paramTypes = method.getGenericParameterTypes();
       Annotation[][] paramAnnotations = method.getParameterAnnotations();
       Key<?>[] paramArray = new Key<?>[paramTypes.length];
+      Class<? extends Annotation> tag = scope.annotation();
+      
       for (int p = 0; p < paramArray.length; p++) {
-        paramArray[p] = getParamKey(paramTypes[p], method, paramAnnotations[p], errors);  
+        paramArray[p] = getParamKey(paramTypes[p], tag, method, paramAnnotations[p], errors);  
       }
     
       this.params = Arrays.asList(paramArray);
@@ -99,15 +101,15 @@ public class FactoryMethodImpl implements FactoryMethod {
    * in the process. If the key already has the {@literal @}Parameter annotation,
    * it is returned as-is to preserve any String value.
    */
-  private static Key<?> getParamKey(Type paramType, Method method, Annotation[] paramTags,
-      Errors errors) throws ErrorsException {
+  private static Key<?> getParamKey(Type paramType, Class<? extends Annotation> scope,
+      Method method, Annotation[] paramTags, Errors errors) throws ErrorsException {
     
     Key<?> key = getKey(TypeLiteral.get(paramType), method, paramTags, errors); 
 
     Class<? extends Annotation> tag = key.getAnnotationType();
     
     if (tag == null) {
-      return Key.get(key.getTypeLiteral(), arg(""));
+      return Key.get(key.getTypeLiteral(), arg(scope));
     }
 
     if (tag == Arg.class) {
@@ -116,7 +118,7 @@ public class FactoryMethodImpl implements FactoryMethod {
 
     throw errors
       .withSource(method)
-      .addMessage("Only @Parameter is allowed for factory parameters, but found @%s", tag)
+      .addMessage("Only @Arg is allowed for factory parameters, but found @%s", tag)
       .toException();
   }
   

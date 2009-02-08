@@ -4,6 +4,7 @@ import java.lang.annotation.Annotation;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.unseen.guice.composite.scopes.AnonymousScope;
 import org.unseen.guice.composite.scopes.DynamicScope;
 import org.unseen.guice.composite.scopes.FactoryMethod;
 import org.unseen.guice.composite.scopes.FactoryProvider;
@@ -61,7 +62,8 @@ public class DynamicScopesLinkedBindingBuilderImpl<T> implements DynamicScopesLi
        * All factory parameters are by default null if not overridden by values
        * cached from a factory method arguments.
        */
-      binder.bind(paramKey).toProvider((Provider) Providers.of(null)).in(tag);
+      System.out.println("binding " + paramKey);
+      binder.bind(paramKey).toProvider((Provider) Providers.of(null)).in(scope);
     }
     
     /* Finally bind the factory itself and continue the DSL */
@@ -79,7 +81,7 @@ public class DynamicScopesLinkedBindingBuilderImpl<T> implements DynamicScopesLi
      * Create a scope and a factory for that scope. This scope has no associated
      * annotation.
      */
-    DynamicScope scope = new DynamicScope(null);
+    DynamicScope scope = new DynamicScope(AnonymousScope.class);
     FactoryProvider<T> factory = new FactoryProvider<T>(iface, scope);
     
     /* Merge all parameters and return values into two unique sets */
