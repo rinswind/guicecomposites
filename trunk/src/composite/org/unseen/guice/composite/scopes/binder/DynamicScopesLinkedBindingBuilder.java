@@ -10,7 +10,7 @@ import com.google.inject.binder.ScopedBindingBuilder;
  * @param <T>
  */
 public interface DynamicScopesLinkedBindingBuilder<T> extends LinkedBindingBuilder<T> {
-  ScopedBindingBuilder toDynamicScope(Class<? extends Annotation> tag);
+  ScopedBindingBuilder toScope(Class<? extends Annotation> tag);
   
-  ScopedBindingBuilder toSingletonDynamicScope(Class<?> member);
+  ScopedBindingBuilder toClassScope(Class<?> member);
 }

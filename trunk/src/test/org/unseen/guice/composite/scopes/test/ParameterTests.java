@@ -51,7 +51,7 @@ public class ParameterTests {
     Injector inj = createInjector(new DynamicScopesModule() {
       @Override
       protected void configure() {
-        bind(ParameterizedFactory.class).toDynamicScope(ParameterizedScope.class);
+        bind(ParameterizedFactory.class).toScope(ParameterizedScope.class);
         bind(Parameterized.class).in(ParameterizedScope.class);
       }
     });
@@ -67,7 +67,7 @@ public class ParameterTests {
     Injector inj = createInjector(new DynamicScopesModule() {
       @Override
       protected void configure() {
-        bind(ParameterizedFactory.class).toDynamicScope(ParameterizedScope.class);
+        bind(ParameterizedFactory.class).toScope(ParameterizedScope.class);
         bind(Parameterized.class).in(ParameterizedScope.class);
       }
     });
@@ -83,7 +83,7 @@ public class ParameterTests {
     Injector inj = createInjector(new DynamicScopesModule() {
       @Override
       protected void configure() {
-        bind(ParameterizedFactory.class).toDynamicScope(ParameterizedScope.class);
+        bind(ParameterizedFactory.class).toScope(ParameterizedScope.class);
         bind(Parameterized.class).in(ParameterizedScope.class);
       }
     });
@@ -96,7 +96,7 @@ public class ParameterTests {
     Injector inj = createInjector(new DynamicScopesModule() {
       @Override
       protected void configure() {
-        bind(ParameterizedFactory.class).toDynamicScope(ParameterizedScope.class);
+        bind(ParameterizedFactory.class).toScope(ParameterizedScope.class);
         bind(Parameterized.class).in(ParameterizedScope.class);
       }
     });

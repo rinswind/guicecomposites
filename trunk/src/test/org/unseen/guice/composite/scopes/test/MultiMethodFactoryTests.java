@@ -61,7 +61,7 @@ public class MultiMethodFactoryTests {
     Injector inj = Guice.createInjector(new DynamicScopesModule() {
       @Override
       protected void configure() {
-        bind(BoxFactory.class).toDynamicScope(ConnectionScoped.class);
+        bind(BoxFactory.class).toScope(ConnectionScoped.class);
         bind(IntegerBox.class).in(ConnectionScoped.class);
         bind(StringBox.class).in(ConnectionScoped.class);
         bind(CombinedBox.class).in(ConnectionScoped.class);

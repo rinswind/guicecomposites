@@ -35,7 +35,7 @@ public class DynamicScopesLinkedBindingBuilderImpl<T> implements DynamicScopesLi
   }
   
   @SuppressWarnings("unchecked")
-  public ScopedBindingBuilder toDynamicScope(Class<? extends Annotation> tag) {
+  public ScopedBindingBuilder toScope(Class<? extends Annotation> tag) {
     if (tag.getAnnotation(ScopeAnnotation.class) == null) {
       throw new IllegalArgumentException(tag + " is not a scope annotation");
     }
@@ -69,7 +69,7 @@ public class DynamicScopesLinkedBindingBuilderImpl<T> implements DynamicScopesLi
   }
   
   @SuppressWarnings("unchecked")
-  public ScopedBindingBuilder toSingletonDynamicScope(Class<?> impl) {
+  public ScopedBindingBuilder toClassScope(Class<?> impl) {
     /* We want to hide the parameter bindings in a private space */
     PrivateBinder privBinder = binder.newPrivateBinder();
     

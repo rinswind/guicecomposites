@@ -50,7 +50,7 @@ public class CurriedConstructorTest {
     Injector inj = Guice.createInjector(new DynamicScopesModule() {
       @Override
       protected void configure() {
-        bind(BoxFactory.class).toSingletonDynamicScope(BoxImpl.class);
+        bind(BoxFactory.class).toClassScope(BoxImpl.class);
         bindConstant().annotatedWith(Names.named("one")).to("one");
       }
     });
@@ -74,7 +74,7 @@ public class CurriedConstructorTest {
     Injector inj = Guice.createInjector(new DynamicScopesModule() {
       @Override
       protected void configure() {
-        bind(BoxFactory.class).toSingletonDynamicScope(BoxImpl.class);
+        bind(BoxFactory.class).toClassScope(BoxImpl.class);
         bindConstant().annotatedWith(Names.named("one")).to("one");
       }
     });
