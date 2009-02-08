@@ -9,7 +9,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 import org.junit.Test;
-import org.unseen.guice.composite.Arg;
+import org.unseen.guice.composite.scopes.Arg;
 import org.unseen.guice.composite.scopes.binder.DynamicScopesModule;
 
 import com.google.inject.Guice;

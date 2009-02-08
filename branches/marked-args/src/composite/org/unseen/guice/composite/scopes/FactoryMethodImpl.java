@@ -8,7 +8,6 @@ import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.List;
 
-import org.unseen.guice.composite.Arg;
 
 import com.google.inject.ConfigurationException;
 import com.google.inject.Key;
@@ -17,7 +16,7 @@ import com.google.inject.TypeLiteral;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
 
-import static org.unseen.guice.composite.Args.*;
+import static org.unseen.guice.composite.scopes.Args.*;
 
 /**
  * Implements a single factory method.
