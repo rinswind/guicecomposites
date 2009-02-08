@@ -3,6 +3,7 @@ package org.unseen.guice.composite.scopes.test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.unseen.guice.composite.scopes.AnonymousScope;
 import org.unseen.guice.composite.scopes.Arg;
@@ -81,5 +82,19 @@ public class CurriedConstructorTest {
     });
     
     inj.getBinding(Key.get(Integer.class, Args.arg(AnonymousScope.class, "")));
+  }
+  
+  @Ignore
+  @Test(expected = ConfigurationException.class)
+  public void testPrivateImplemetation() {
+    Injector inj = Guice.createInjector(new DynamicScopesModule() {
+      @Override
+      protected void configure() {
+        bind(BoxFactory.class).toClassScope(BoxImpl.class);
+        bindConstant().annotatedWith(Names.named("one")).to("one");
+      }
+    });
+    
+    inj.getBinding(Key.get(BoxImpl.class));
   }
 }
