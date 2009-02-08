@@ -12,7 +12,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 import org.junit.Test;
-import org.unseen.guice.composite.Parameter;
+import org.unseen.guice.composite.Arg;
 import org.unseen.guice.composite.scopes.binder.DynamicScopesModule;
 
 import com.google.inject.Inject;
@@ -22,7 +22,7 @@ import com.google.inject.ProvisionException;
 import com.google.inject.ScopeAnnotation;
 import com.google.inject.internal.Nullable;
 
-import static org.unseen.guice.composite.Parameters.*;
+import static org.unseen.guice.composite.Args.*;
 
 public class ParameterTests {
   @ScopeAnnotation
@@ -32,7 +32,7 @@ public class ParameterTests {
   }
   
   interface ParameterizedFactory {
-    Parameterized create(@Parameter("a") String a, @Parameter("b") String b);
+    Parameterized create(@Arg("a") String a, @Arg("b") String b);
   }
   
   public static class Parameterized {
@@ -40,7 +40,7 @@ public class ParameterTests {
     final String b;
     
     @Inject     
-    public Parameterized(@Parameter("a") String a, @Nullable @Parameter("b") String b) {
+    public Parameterized(@Arg("a") String a, @Nullable @Arg("b") String b) {
       this.a = a;
       this.b = b;
     }
@@ -101,7 +101,7 @@ public class ParameterTests {
       }
     });
     
-    assertNotNull(inj.getBinding(Key.get(String.class, parameter("a"))));
-    assertNotNull(inj.getBinding(Key.get(String.class, parameter("b"))));
+    assertNotNull(inj.getBinding(Key.get(String.class, arg("a"))));
+    assertNotNull(inj.getBinding(Key.get(String.class, arg("b"))));
   }
 }

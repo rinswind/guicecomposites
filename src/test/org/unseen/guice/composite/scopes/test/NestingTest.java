@@ -12,7 +12,7 @@ import java.lang.annotation.Target;
 import java.net.Socket;
 
 import org.junit.Test;
-import org.unseen.guice.composite.Parameter;
+import org.unseen.guice.composite.Arg;
 import org.unseen.guice.composite.scopes.binder.DynamicScopesModule;
 
 import com.google.inject.Inject;
@@ -95,7 +95,7 @@ public class NestingTest {
     private final RequestFactory requests;
     
     @Inject 
-    public ConnectionImpl(@Parameter Socket sock, Server server, RequestFactory requests) {
+    public ConnectionImpl(@Arg Socket sock, Server server, RequestFactory requests) {
       this.sock = sock;
       this.server = server;
       this.requests = requests;
@@ -120,7 +120,7 @@ public class NestingTest {
     private final Response resp;
     
     @Inject
-    public RequestImpl(@Parameter String header, Connection conn, Response resp) {
+    public RequestImpl(@Arg String header, Connection conn, Response resp) {
       this.header = header;
       this.conn = conn;
       this.resp = resp;

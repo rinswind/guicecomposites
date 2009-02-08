@@ -16,6 +16,6 @@ import com.google.inject.BindingAnnotation;
 @BindingAnnotation
 @Target({FIELD, PARAMETER})
 @Retention(RUNTIME)
-public @interface Parameter {
+public @interface Arg {
   String value() default "";
 }

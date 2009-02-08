@@ -4,8 +4,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
-import org.unseen.guice.composite.Parameter;
-import org.unseen.guice.composite.Parameters;
+import org.unseen.guice.composite.Arg;
+import org.unseen.guice.composite.Args;
 import org.unseen.guice.composite.scopes.binder.DynamicScopesModule;
 
 import com.google.inject.ConfigurationException;
@@ -31,7 +31,7 @@ public class CurriedConstructorTest {
     private final int two;
     
     @Inject
-    public BoxImpl(@Named("one") String one, @Parameter int two) {
+    public BoxImpl(@Named("one") String one, @Arg int two) {
       this.one = one;
       this.two = two;
     }
@@ -79,6 +79,6 @@ public class CurriedConstructorTest {
       }
     });
     
-    inj.getBinding(Key.get(Integer.class, Parameters.parameter("")));
+    inj.getBinding(Key.get(Integer.class, Args.arg("")));
   }
 }
