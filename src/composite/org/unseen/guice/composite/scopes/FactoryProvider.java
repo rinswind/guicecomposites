@@ -17,7 +17,6 @@ import com.google.inject.Key;
 import com.google.inject.Provider;
 import com.google.inject.Scope;
 import com.google.inject.internal.Errors;
-import com.google.inject.internal.ErrorsException;
 import com.google.inject.spi.BindingScopingVisitor;
 import com.google.inject.spi.Message;
 
@@ -77,9 +76,7 @@ public class FactoryProvider<F> implements Provider<F> {
     private final DynamicScope expected;
     private final Errors errors;
     
-    public ScopeChecker(DynamicScope expected, String checked, Object source,
-        Errors errors) {
-      
+    public ScopeChecker(DynamicScope expected, String checked, Object source, Errors errors) {
       this.checked = checked;
       this.source = source;
       this.expected = expected;
@@ -125,10 +122,6 @@ public class FactoryProvider<F> implements Provider<F> {
   /** Part of the state loaded into every created factory - injected later */
   private Injector injector;
   
-  /**
-   * @param binder
-   * @throws ErrorsException 
-   */
   public FactoryProvider(Class<F> iface, DynamicScope scope) {
     if (!iface.isInterface()) {
       throw new ConfigurationException(Arrays.asList(new Message("Only interfaces can be used for "

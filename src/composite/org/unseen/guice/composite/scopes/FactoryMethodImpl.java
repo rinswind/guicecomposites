@@ -30,12 +30,6 @@ public class FactoryMethodImpl implements FactoryMethod {
   /** The parameters passed into the new dynamic context */
   private final List<Key<?>> params;
   
-  /**
-   * @param method
-   * @param binder
-   * @param errors
-   * @throws ErrorsException 
-   */
   public FactoryMethodImpl(Method method) {
     this.method = method;
     
