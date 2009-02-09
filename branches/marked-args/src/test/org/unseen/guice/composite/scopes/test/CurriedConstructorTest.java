@@ -81,7 +81,7 @@ public class CurriedConstructorTest {
       }
     });
     
-    inj.getBinding(Key.get(Integer.class, Args.arg(AnonymousScope.class, "")));
+    inj.getBinding(Key.get(Integer.class, Args.arg(AnonymousScope.class)));
   }
   
   @Ignore

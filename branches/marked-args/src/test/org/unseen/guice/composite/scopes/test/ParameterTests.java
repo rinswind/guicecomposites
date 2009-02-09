@@ -50,6 +50,22 @@ public class ParameterTests {
     }
   }
   
+//  interface DefaultParametrizedFactory {
+//    Parameterized create(String a, Integer b);
+//  }
+//  
+//  public static class DefaultParameterized {
+//    final String a;
+//    final Integer b;
+//    
+//    @Inject     
+//    public DefaultParameterized(
+//        @Arg(ParameterizedScope.class) String a, @Arg(ParameterizedScope.class) Integer b) {
+//      this.a = a;
+//      this.b = b;
+//    }
+//  }
+  
   @Test
   public void testParameter() {
     Injector inj = createInjector(new DynamicScopesModule() {
@@ -96,6 +112,7 @@ public class ParameterTests {
     fact.create(null, "b");
   }
   
+  @Test
   public void testParameterBindings() {
     Injector inj = createInjector(new DynamicScopesModule() {
       @Override
@@ -105,7 +122,7 @@ public class ParameterTests {
       }
     });
     
-    assertNotNull(inj.getBinding(Key.get(String.class, arg(ParameterizedScope.class, "a"))));
-    assertNotNull(inj.getBinding(Key.get(String.class, arg(ParameterizedScope.class, "b"))));
+    assertNotNull(inj.getBinding(Key.get(String.class, arg("a", ParameterizedScope.class))));
+    assertNotNull(inj.getBinding(Key.get(String.class, arg("b", ParameterizedScope.class))));
   }
 }

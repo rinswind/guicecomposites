@@ -6,13 +6,19 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import static org.junit.Assert.assertEquals;
 import static org.unseen.guice.composite.scopes.Args.arg;
 
+import java.lang.annotation.Annotation;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
+import java.lang.reflect.Method;
 
 import org.junit.Test;
 import org.unseen.guice.composite.scopes.Arg;
+import org.unseen.guice.composite.scopes.FactoryMethodImpl;
 
+import com.google.inject.Key;
 import com.google.inject.ScopeAnnotation;
+import com.google.inject.internal.Errors;
+import com.google.inject.internal.ErrorsException;
 
 public class AnnotationsTest {
   @ScopeAnnotation
@@ -41,10 +47,12 @@ public class AnnotationsTest {
   @Test
   public void testNnamedEquals() throws SecurityException, NoSuchMethodException {
     Arg one = getArg(Annotated.class, "full");
-    Arg two = arg(TestScope.class, "a");
+    Arg two = arg("a", TestScope.class);
     
     assertEquals(one.annotationType(), two.annotationType());
     assertEquals(one, two);
+    
+    assertEquals(one.hashCode(), two.hashCode());
   }
   
   @Test
@@ -53,6 +61,17 @@ public class AnnotationsTest {
     Arg two = arg(null);
      
     assertEquals(one.annotationType(), two.annotationType());
+    assertEquals(one, two);
+  }
+  
+  @Test
+  public void testParamKeys() throws ErrorsException, SecurityException, NoSuchMethodException {
+    Method method = Annotated.class.getMethod("unnamed", new Class[]{String.class});
+    Annotation[] tags = method.getParameterAnnotations()[0];
+    
+    Key<?> one = FactoryMethodImpl.getParamKey(String.class, TestScope.class, method, tags, new Errors());
+    Key<?> two = Key.get(String.class, arg(TestScope.class));
+    
     assertEquals(one, two);
   }
   

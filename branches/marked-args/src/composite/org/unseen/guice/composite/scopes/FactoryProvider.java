@@ -165,7 +165,7 @@ public class FactoryProvider<F> implements Provider<F> {
         binding = injector.getBinding(ent.getValue().returnType());
         
         /*
-         * If this is not an annonymous singleton dynamic scope we must validate
+         * If this is not an anonymous singleton dynamic scope we must validate
          * that the user has bound all return values to the same scope as the
          * one managed by this factory.
          */
