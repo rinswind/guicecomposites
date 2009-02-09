@@ -94,7 +94,7 @@ public class NestingTest {
     private final Server server;
     private final RequestFactory requests;
     
-    @Inject 
+    @Inject
     public ConnectionImpl(@Arg(ConnectionScoped.class) Socket sock, Server server, RequestFactory requests) {
       this.sock = sock;
       this.server = server;

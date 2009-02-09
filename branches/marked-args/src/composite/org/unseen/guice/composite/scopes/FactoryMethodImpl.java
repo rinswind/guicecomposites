@@ -113,6 +113,15 @@ public class FactoryMethodImpl implements FactoryMethod {
     }
 
     if (tag == Arg.class) {
+      /*
+       * By default the annotations on factory methods may omit the scope name.
+       * We add it for them.
+       */
+      Arg arg = (Arg) key.getAnnotation(); 
+      if (arg.value() == AnonymousScope.class) {
+        return Key.get(key.getTypeLiteral(), arg(arg.name(), scope));
+      }
+      
       return key;
     }
 
