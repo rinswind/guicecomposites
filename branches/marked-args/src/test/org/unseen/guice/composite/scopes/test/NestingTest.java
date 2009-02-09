@@ -50,7 +50,7 @@ public class NestingTest {
   }
   
   public interface ConnectionFactory {
-    Connection create(@Arg(ConnectionScoped.class) Socket sock);
+    Connection create(Socket sock);
   }
   
   public interface Connection {
@@ -62,7 +62,7 @@ public class NestingTest {
   }
   
   public interface RequestFactory {
-    Request create(@Arg(RequestScoped.class) String header);
+    Request create(String header);
   }
   
   public interface Request {
