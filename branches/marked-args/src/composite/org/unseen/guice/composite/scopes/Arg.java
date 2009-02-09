@@ -18,7 +18,7 @@ import com.google.inject.BindingAnnotation;
 @Target({FIELD, PARAMETER})
 @Retention(RUNTIME)
 public @interface Arg {
-  Class<? extends Annotation> value() default AnonymousScope.class;
-  
   String name() default "";
+  
+  Class<? extends Annotation> value() default AnonymousScope.class;
 }

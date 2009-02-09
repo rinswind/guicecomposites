@@ -11,12 +11,12 @@ import org.unseen.guice.composite.scopes.FactoryProvider;
 
 import com.google.inject.Binder;
 import com.google.inject.Key;
+import com.google.inject.PrivateBinder;
 import com.google.inject.Provider;
 import com.google.inject.Scope;
 import com.google.inject.ScopeAnnotation;
 import com.google.inject.TypeLiteral;
 import com.google.inject.binder.LinkedBindingBuilder;
-import com.google.inject.binder.PrivateBinder;
 import com.google.inject.binder.ScopedBindingBuilder;
 import com.google.inject.util.Providers;
 
@@ -62,7 +62,6 @@ public class DynamicScopesLinkedBindingBuilderImpl<T> implements DynamicScopesLi
        * All factory parameters are by default null if not overridden by values
        * cached from a factory method arguments.
        */
-      System.out.println("binding " + paramKey);
       binder.bind(paramKey).toProvider((Provider) Providers.of(null)).in(scope);
     }
     

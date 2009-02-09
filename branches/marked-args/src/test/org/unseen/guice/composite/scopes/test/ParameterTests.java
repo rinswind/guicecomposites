@@ -5,8 +5,9 @@ import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertNotNull;
+import static junit.framework.Assert.assertNull;
+import static org.unseen.guice.composite.scopes.Args.arg;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
@@ -22,8 +23,6 @@ import com.google.inject.Key;
 import com.google.inject.ProvisionException;
 import com.google.inject.ScopeAnnotation;
 import com.google.inject.internal.Nullable;
-
-import static org.unseen.guice.composite.scopes.Args.*;
 
 public class ParameterTests {
   @ScopeAnnotation

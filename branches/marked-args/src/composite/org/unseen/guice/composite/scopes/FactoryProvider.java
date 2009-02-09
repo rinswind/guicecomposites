@@ -169,7 +169,7 @@ public class FactoryProvider<F> implements Provider<F> {
          * that the user has bound all return values to the same scope as the
          * one managed by this factory.
          */
-        if (this.scope.annotation() != null) {
+        if (this.scope.annotation() != AnonymousScope.class) {
           binding.acceptScopingVisitor(new ScopeChecker(this.scope, "return value", ent.getKey(), errors));
         }
       } catch (ConfigurationException e) {

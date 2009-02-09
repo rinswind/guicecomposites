@@ -47,8 +47,8 @@ public class Args {
     }
     
     public int hashCode() {
-      return (127 * "name".hashCode()) ^ name.hashCode() + 
-        (127 * "value".hashCode()) ^ value.hashCode();
+      return ((127 * "name".hashCode()) ^ name.hashCode()) + 
+        ((127 * "value".hashCode()) ^ value.hashCode());
     }
   }
   
