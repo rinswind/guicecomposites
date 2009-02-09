@@ -92,6 +92,7 @@ public class ParameterTests {
     fact.create(null, "b");
   }
   
+  @Test
   public void testParameterBindings() {
     Injector inj = createInjector(new DynamicScopesModule() {
       @Override
