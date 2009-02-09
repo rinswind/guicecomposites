@@ -51,8 +51,6 @@ public class AnnotationsTest {
     
     assertEquals(one.annotationType(), two.annotationType());
     assertEquals(one, two);
-    
-    assertEquals(one.hashCode(), two.hashCode());
   }
   
   @Test
