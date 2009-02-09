@@ -70,7 +70,7 @@ public class DynamicScopesLinkedBindingBuilderImpl<T> implements DynamicScopesLi
   }
   
   @SuppressWarnings("unchecked")
-  public ScopedBindingBuilder toClassScope(Class<?> impl) {
+  public void toClassScope(Class<?> impl) {
     /* We want to hide the parameter bindings in a private space */
     PrivateBinder privBinder = binder.newPrivateBinder();
     
@@ -93,17 +93,23 @@ public class DynamicScopesLinkedBindingBuilderImpl<T> implements DynamicScopesLi
     
     /* Bind the return values into the anonymous scope and expose them */
     for (Key returnKey : returns) {
-      privBinder.bind(returnKey).to(impl).in(scope);
+      if (!returnKey.getTypeLiteral().getRawType().equals(impl)) {
+        privBinder.bind(returnKey).to(impl).in(scope);
+      } else {
+        privBinder.bind(returnKey);
+      }
+      
       privBinder.expose(returnKey);
     }
     
     /* Bind the parameters into the anonymous scope */
     for (Key paramKey : params) {
+      
       privBinder.bind(paramKey).toProvider(Providers.of(null)).in(scope);
     }
     
     /* Finally bind the factory itself and continue the DSL */
-    return wrapped.toProvider(factory);
+    wrapped.toProvider(factory);
   }
   
   public ScopedBindingBuilder to(Class<? extends T> implementation) {
