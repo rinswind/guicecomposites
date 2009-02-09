@@ -101,7 +101,7 @@ public class FactoryMethodImpl implements FactoryMethod {
    * in the process. If the key already has the {@literal @}Parameter annotation,
    * it is returned as-is to preserve any String value.
    */
-  private static Key<?> getParamKey(Type paramType, Class<? extends Annotation> scope,
+  public static Key<?> getParamKey(Type paramType, Class<? extends Annotation> scope,
       Method method, Annotation[] paramTags, Errors errors) throws ErrorsException {
     
     Key<?> key = getKey(TypeLiteral.get(paramType), method, paramTags, errors); 

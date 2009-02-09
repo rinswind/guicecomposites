@@ -34,7 +34,7 @@ public class Args {
     }
     
     public String toString() {
-      return "@" + Arg.class.getName() + "(value=" + value + ", name=" + name + ")";
+      return "@" + Arg.class.getName() + "(name=" + name + ", value=" + value + ")";
     }
     
     public boolean equals(Object o) {
@@ -47,16 +47,16 @@ public class Args {
     }
     
     public int hashCode() {
-      return (127 * "value".hashCode()) ^ value.hashCode() + 
-             (127 * "name".hashCode()) ^ name.hashCode();
+      return (127 * "name".hashCode()) ^ name.hashCode() + 
+        (127 * "value".hashCode()) ^ value.hashCode();
     }
   }
   
   public static Arg arg(Class<? extends Annotation> value) {
-    return arg(value, "");
+    return arg("", value);
   }
   
-  public static Arg arg(Class<? extends Annotation> value, String name) {
+  public static Arg arg(String name, Class<? extends Annotation> value) {
     if (value == null) {
       value = AnonymousScope.class;
     }
