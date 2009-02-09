@@ -11,6 +11,7 @@ import static junit.framework.Assert.assertNotNull;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.unseen.guice.composite.scopes.Arg;
 import org.unseen.guice.composite.scopes.binder.DynamicScopesModule;
@@ -50,32 +51,21 @@ public class ParameterTests {
     }
   }
   
-//  interface DefaultParametrizedFactory {
-//    Parameterized create(String a, Integer b);
-//  }
-//  
-//  public static class DefaultParameterized {
-//    final String a;
-//    final Integer b;
-//    
-//    @Inject     
-//    public DefaultParameterized(
-//        @Arg(ParameterizedScope.class) String a, @Arg(ParameterizedScope.class) Integer b) {
-//      this.a = a;
-//      this.b = b;
-//    }
-//  }
+  private Injector inj;
   
-  @Test
-  public void testParameter() {
-    Injector inj = createInjector(new DynamicScopesModule() {
+  @Before
+  public void setupInjector() {
+    this.inj = createInjector(new DynamicScopesModule() {
       @Override
       protected void configure() {
         bind(ParameterizedFactory.class).toScope(ParameterizedScope.class);
         bind(Parameterized.class).in(ParameterizedScope.class);
       }
     });
-    
+  }
+  
+  @Test
+  public void testParameter() {
     ParameterizedFactory fact = inj.getInstance(ParameterizedFactory.class);
     Parameterized par = fact.create("a", "b");
     assertEquals("a", par.a);
@@ -84,14 +74,6 @@ public class ParameterTests {
   
   @Test
   public void testNullParameter() {
-    Injector inj = createInjector(new DynamicScopesModule() {
-      @Override
-      protected void configure() {
-        bind(ParameterizedFactory.class).toScope(ParameterizedScope.class);
-        bind(Parameterized.class).in(ParameterizedScope.class);
-      }
-    });
-    
     ParameterizedFactory fact = inj.getInstance(ParameterizedFactory.class);
     Parameterized par = fact.create("a", null);
     assertEquals("a", par.a);
@@ -100,28 +82,12 @@ public class ParameterTests {
   
   @Test(expected = ProvisionException.class)
   public void testUnannotatedNullParameter() {
-    Injector inj = createInjector(new DynamicScopesModule() {
-      @Override
-      protected void configure() {
-        bind(ParameterizedFactory.class).toScope(ParameterizedScope.class);
-        bind(Parameterized.class).in(ParameterizedScope.class);
-      }
-    });
-    
     ParameterizedFactory fact = inj.getInstance(ParameterizedFactory.class);
     fact.create(null, "b");
   }
   
   @Test
   public void testParameterBindings() {
-    Injector inj = createInjector(new DynamicScopesModule() {
-      @Override
-      protected void configure() {
-        bind(ParameterizedFactory.class).toScope(ParameterizedScope.class);
-        bind(Parameterized.class).in(ParameterizedScope.class);
-      }
-    });
-    
     assertNotNull(inj.getBinding(Key.get(String.class, arg("a", ParameterizedScope.class))));
     assertNotNull(inj.getBinding(Key.get(String.class, arg("b", ParameterizedScope.class))));
   }
