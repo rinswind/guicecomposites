@@ -32,9 +32,7 @@ public class ParameterTests {
   }
   
   interface ParameterizedFactory {
-    Parameterized create(
-        @Arg(name="a", value=ParameterizedScope.class) String a, 
-        @Arg(name="b", value=ParameterizedScope.class) String b);
+    Parameterized create(@Arg(name="a") String a, @Arg(name="b") String b);
   }
   
   public static class Parameterized {
