@@ -4,7 +4,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.unseen.guice.composite.scopes.AnonymousScope;
 import org.unseen.guice.composite.scopes.Arg;
@@ -82,7 +81,6 @@ public class ClassScopeTests {
     inj.getBinding(Key.get(Integer.class, Args.arg(AnonymousScope.class)));
   }
   
-  @Ignore
   @Test(expected = ConfigurationException.class)
   public void testPrivateImplemetation() {
     inj.getBinding(Key.get(BoxImpl.class));

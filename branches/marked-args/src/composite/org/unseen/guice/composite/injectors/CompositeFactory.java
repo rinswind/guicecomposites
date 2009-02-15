@@ -1,5 +1,7 @@
 package org.unseen.guice.composite.injectors;
 
+import static com.google.inject.internal.BytecodeGen.getClassLoader;
+
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
@@ -60,7 +62,7 @@ public class CompositeFactory<F> implements InvocationHandler {
      * everything else to the loader of the factory interface.
      */
     this.proxy = factory.cast(Proxy.newProxyInstance(
-        factory.getClassLoader(), new Class[] { factory }, this));
+        getClassLoader(factory), new Class[] { factory }, this));
   }
   
   /**

@@ -15,5 +15,5 @@ import org.junit.runners.Suite.SuiteClasses;
   ClassScopeTests.class,
   AnnotationsTest.class
 })
-public class DynamicScopesSuite {
+public class CompositeScopesSuite {
 }
