@@ -13,7 +13,8 @@ import org.junit.runners.Suite.SuiteClasses;
   MultiMethodFactoryTests.class,
   ParameterTests.class,
   ClassScopeTests.class,
-  AnnotationsTest.class
+  AnnotationsTest.class,
+  OverloadedFactoryTest.class,
 })
 public class CompositeScopesSuite {
 }
