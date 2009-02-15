@@ -1,9 +1,10 @@
-package org.unseen.guice.composite;
+package org.unseen.guice.composite.scopes;
 
 import static java.lang.annotation.ElementType.PARAMETER;
 import static java.lang.annotation.ElementType.FIELD;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
+import java.lang.annotation.Annotation;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
@@ -17,5 +18,7 @@ import com.google.inject.BindingAnnotation;
 @Target({FIELD, PARAMETER})
 @Retention(RUNTIME)
 public @interface Arg {
-  String value() default "";
+  String name() default "";
+  
+  Class<? extends Annotation> value() default AnonymousScope.class;
 }

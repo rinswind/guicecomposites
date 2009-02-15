@@ -3,9 +3,11 @@ package org.unseen.guice.composite.scopes.test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import org.junit.Before;
 import org.junit.Test;
-import org.unseen.guice.composite.Arg;
-import org.unseen.guice.composite.Args;
+import org.unseen.guice.composite.scopes.AnonymousScope;
+import org.unseen.guice.composite.scopes.Arg;
+import org.unseen.guice.composite.scopes.Args;
 import org.unseen.guice.composite.scopes.binder.DynamicScopesModule;
 
 import com.google.inject.ConfigurationException;
@@ -16,7 +18,7 @@ import com.google.inject.Key;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
 
-public class CurriedConstructorTest {
+public class ClassScopeTests {
   public interface BoxFactory { 
     Box create(int two);
   }
@@ -45,16 +47,21 @@ public class CurriedConstructorTest {
     }
   }
   
-  @Test
-  public void testConstructors() {
-    Injector inj = Guice.createInjector(new DynamicScopesModule() {
+  private Injector inj;
+  
+  @Before
+  public void setupInjector() {
+    this.inj = Guice.createInjector(new DynamicScopesModule() {
       @Override
       protected void configure() {
         bind(BoxFactory.class).toClassScope(BoxImpl.class);
         bindConstant().annotatedWith(Names.named("one")).to("one");
       }
     });
-    
+  }
+  
+  @Test
+  public void testConstructors() {
     BoxFactory fact = inj.getInstance(BoxFactory.class);
     
     Box b1 = fact.create(42);
@@ -71,14 +78,11 @@ public class CurriedConstructorTest {
   
   @Test(expected = ConfigurationException.class)
   public void testPrivateParameters() {
-    Injector inj = Guice.createInjector(new DynamicScopesModule() {
-      @Override
-      protected void configure() {
-        bind(BoxFactory.class).toClassScope(BoxImpl.class);
-        bindConstant().annotatedWith(Names.named("one")).to("one");
-      }
-    });
-    
-    inj.getBinding(Key.get(Integer.class, Args.arg("")));
+    inj.getBinding(Key.get(Integer.class, Args.arg(AnonymousScope.class)));
+  }
+  
+  @Test(expected = ConfigurationException.class)
+  public void testPrivateImplemetation() {
+    inj.getBinding(Key.get(BoxImpl.class));
   }
 }

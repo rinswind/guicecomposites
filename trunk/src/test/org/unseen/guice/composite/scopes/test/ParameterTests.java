@@ -5,15 +5,16 @@ import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertNotNull;
+import static junit.framework.Assert.assertNull;
+import static org.unseen.guice.composite.scopes.Args.arg;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.unseen.guice.composite.Arg;
+import org.unseen.guice.composite.scopes.Arg;
 import org.unseen.guice.composite.scopes.binder.DynamicScopesModule;
 
 import com.google.inject.Inject;
@@ -23,8 +24,6 @@ import com.google.inject.ProvisionException;
 import com.google.inject.ScopeAnnotation;
 import com.google.inject.internal.Nullable;
 
-import static org.unseen.guice.composite.Args.*;
-
 public class ParameterTests {
   @ScopeAnnotation
   @Retention(RUNTIME)
@@ -33,7 +32,7 @@ public class ParameterTests {
   }
   
   interface ParameterizedFactory {
-    Parameterized create(@Arg("a") String a, @Arg("b") String b);
+    Parameterized create(@Arg(name="a") String a, @Arg(name="b") String b);
   }
   
   public static class Parameterized {
@@ -41,7 +40,9 @@ public class ParameterTests {
     final String b;
     
     @Inject     
-    public Parameterized(@Arg("a") String a, @Nullable @Arg("b") String b) {
+    public Parameterized(
+        @Arg(name="a", value=ParameterizedScope.class) String a, 
+        @Nullable @Arg(name="b", value=ParameterizedScope.class) String b) {
       this.a = a;
       this.b = b;
     }
@@ -84,7 +85,7 @@ public class ParameterTests {
   
   @Test
   public void testParameterBindings() {
-    assertNotNull(inj.getBinding(Key.get(String.class, arg("a"))));
-    assertNotNull(inj.getBinding(Key.get(String.class, arg("b"))));
+    assertNotNull(inj.getBinding(Key.get(String.class, arg("a", ParameterizedScope.class))));
+    assertNotNull(inj.getBinding(Key.get(String.class, arg("b", ParameterizedScope.class))));
   }
 }

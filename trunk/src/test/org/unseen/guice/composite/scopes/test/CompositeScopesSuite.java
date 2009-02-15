@@ -12,7 +12,8 @@ import org.junit.runners.Suite.SuiteClasses;
   ValidationTests.class, 
   MultiMethodFactoryTests.class,
   ParameterTests.class,
-  CurriedConstructorTest.class
+  ClassScopeTests.class,
+  AnnotationsTest.class
 })
-public class DynamicScopesSuite {
+public class CompositeScopesSuite {
 }

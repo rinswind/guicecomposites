@@ -1,5 +1,7 @@
 package org.unseen.guice.composite.scopes;
 
+import static com.google.inject.internal.BytecodeGen.getClassLoader;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
@@ -135,7 +137,7 @@ public class FactoryProvider<F> implements Provider<F> {
 
     for (Class<?> cl = iface; cl != null; cl = iface.getSuperclass()) {
       for (Method method : cl.getMethods()) {
-        methods.put(method, new FactoryMethodImpl(method));
+        methods.put(method, new FactoryMethodImpl(method, scope));
       }
     }
   }
@@ -165,11 +167,11 @@ public class FactoryProvider<F> implements Provider<F> {
         binding = injector.getBinding(ent.getValue().returnType());
         
         /*
-         * If this is not an annonymous singleton dynamic scope we must validate
+         * If this is not an anonymous singleton dynamic scope we must validate
          * that the user has bound all return values to the same scope as the
          * one managed by this factory.
          */
-        if (this.scope.annotation() != null) {
+        if (this.scope.annotation() != AnonymousScope.class) {
           binding.acceptScopingVisitor(new ScopeChecker(this.scope, "return value", ent.getKey(), errors));
         }
       } catch (ConfigurationException e) {
@@ -206,19 +208,6 @@ public class FactoryProvider<F> implements Provider<F> {
      */
     FactoryInstance factory = new FactoryInstance(scope, active, injector, methods);
 
-    /*
-     * FIX Can cause trouble under OSGi. The problem here is that the factory
-     * interface class loader is different from the class loader of the internal
-     * classes we use to support the proxy. We need a class loader bridge that
-     * will delegate the loading of our internal classes to our loader and
-     * everything else to the loader of the factory interface.
-     * 
-     * With no bridge to make this work under OSGi we must not have internal
-     * unexported classes that support the proxy. The easiest way it so have
-     * everything in one public package so that the consumers import the impl
-     * classes together with the public interface. This of course is bad OSGi
-     * practice.
-     */
-    return iface.cast(Proxy.newProxyInstance(iface.getClassLoader(), new Class[] {iface}, factory));
+    return iface.cast(Proxy.newProxyInstance(getClassLoader(iface), new Class[] {iface}, factory));
   }
 }
