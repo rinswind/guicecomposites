@@ -23,6 +23,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.unseen.guice.composite.scopes.Arg;
 import org.unseen.guice.composite.scopes.binder.DynamicScopesModule;
@@ -485,7 +486,7 @@ public class ClassScopeTests {
     Provider<Color> colorProvider;
   }
 
-  @Test
+  @Ignore @Test
   public void testInjectingProviderOfParameter() {
     Injector inj = createInjector(new DynamicScopesModule() {
       @Override
@@ -501,7 +502,7 @@ public class ClassScopeTests {
     assertSame(RED, subaru.colorProvider.get());
   }
 
-  @Test
+  @Ignore @Test
   public void testInjectingNullParameter() {
     Injector injector = createInjector(new DynamicScopesModule() {
       @Override
