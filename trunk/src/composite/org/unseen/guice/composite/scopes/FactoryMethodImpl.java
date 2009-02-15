@@ -29,7 +29,7 @@ public class FactoryMethodImpl implements FactoryMethod {
   /** The parameters passed into the new dynamic context */
   private final List<Key<?>> params;
   
-  public FactoryMethodImpl(Method method, DynamicScope scope) {
+  public FactoryMethodImpl(TypeLiteral<?> factory, Method method, DynamicScope scope) {
     this.method = method;
     
     /*
@@ -39,8 +39,7 @@ public class FactoryMethodImpl implements FactoryMethod {
     Errors errors = new Errors();
     try {
       /* Build this methods return type */
-      this.result = getKey(
-          TypeLiteral.get(method.getGenericReturnType()), method, method.getAnnotations(), errors);
+      this.result = getKey(factory.getReturnType(method), method, method.getAnnotations(), errors);
       
       /* Build this methods arguments */
       Type[] paramTypes = method.getGenericParameterTypes();
