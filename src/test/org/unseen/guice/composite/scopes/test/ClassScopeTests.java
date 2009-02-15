@@ -11,7 +11,6 @@ import static java.awt.Color.RED;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.fail;
 
@@ -486,7 +485,15 @@ public class ClassScopeTests {
     Provider<Color> colorProvider;
   }
 
-  @Ignore @Test
+  /**
+   * This test will never work. The dynamic scopes can't inject Providers and
+   * Injectors - only other dynamically scoped factories. The reason is that
+   * Guice does not allow me to intercept the injection of Providers so I can't
+   * capture inside the injected providers the "current creation context" as I
+   * do when injecting dynamically generated factories.
+   */
+  @Ignore 
+  @Test
   public void testInjectingProviderOfParameter() {
     Injector inj = createInjector(new DynamicScopesModule() {
       @Override
@@ -500,22 +507,6 @@ public class ClassScopeTests {
 
     assertSame(RED, subaru.colorProvider.get());
     assertSame(RED, subaru.colorProvider.get());
-  }
-
-  @Ignore @Test
-  public void testInjectingNullParameter() {
-    Injector injector = createInjector(new DynamicScopesModule() {
-      @Override
-      protected void configure() {
-        bind(ColoredCarFactory.class).toClassScope(Subaru.class);
-      }
-    });
-
-    ColoredCarFactory carFactory = injector.getInstance(ColoredCarFactory.class);
-    Subaru subaru = (Subaru) carFactory.create(null);
-
-    assertNull(subaru.colorProvider.get());
-    assertNull(subaru.colorProvider.get());
   }
 
 // @Test

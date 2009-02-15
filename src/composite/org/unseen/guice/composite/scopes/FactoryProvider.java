@@ -204,8 +204,8 @@ public class FactoryProvider<F> implements Provider<F> {
     DynamicScopeInstance active = DynamicScopeInstance.isActive() ? DynamicScopeInstance.active() : null;
     
     /*
-     * Return a factory that will continue the creation starting from the scope
-     * that is active right now.
+     * Return a factory that will continue the creation starting from the
+     * dynamic scope instance that is active right now.
      */
     FactoryInstance factory = new FactoryInstance(scope, active, injector, methods);
     

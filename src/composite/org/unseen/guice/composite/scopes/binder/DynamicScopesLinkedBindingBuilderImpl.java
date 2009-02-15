@@ -100,7 +100,6 @@ public class DynamicScopesLinkedBindingBuilderImpl<T> implements DynamicScopesLi
     
     /* Bind the parameters into the anonymous scope */
     for (Key paramKey : params) {
-      
       privBinder.bind(paramKey).toProvider(Providers.of(null)).in(scope);
     }
     

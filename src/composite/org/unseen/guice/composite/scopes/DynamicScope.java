@@ -30,10 +30,21 @@ public class DynamicScope implements Scope {
     return new Provider<T>() {
       public T get() {
         /*
-         * TODO Make sure the scope of the current provider is always equal or wider
-         * than the active scope. Wider because a part of the parent scope might be
-         * lazily created because of demand by a narrower scope. This will require
-         * me to introduce explicit scope ordering.
+         * TODO Make sure the scope of the current provider is always equal or
+         * wider than the active scope. Wider because a part of the parent scope
+         * might be lazily created on demand by a narrower scope. This will
+         * require me to introduce explicit scope ordering.
+         */
+        
+        /*
+         * This provider must be called in one-shot mode only during recursive
+         * creation that was initiated by a call to a dynamic scope factory. The
+         * factory will setup the dynamic scope instance from which this
+         * provider can obtain values. The dynamic scope instance is lost as
+         * soon as the creation finishes. If this provider is injected directly
+         * into an object it's get() method will be called after the active
+         * dynamic scope is dead and the provider won't work. Therefore
+         * dynamically scoped providers must never be injected.
          */
         return DynamicScopeInstance.active().search(key, unscoped, DynamicScope.this);
       }
