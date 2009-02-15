@@ -17,6 +17,7 @@ import org.unseen.guice.composite.scopes.FactoryMethodImpl;
 
 import com.google.inject.Key;
 import com.google.inject.ScopeAnnotation;
+import com.google.inject.TypeLiteral;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
 
@@ -69,7 +70,8 @@ public class AnnotationsTest {
     Method method = Annotated.class.getMethod("unnamed", new Class[]{String.class});
     Annotation[] tags = method.getParameterAnnotations()[0];
     
-    Key<?> one = FactoryMethodImpl.getParamKey(String.class, TestScope.class, method, tags, new Errors());
+    Key<?> one = FactoryMethodImpl.getParamKey(TypeLiteral.get(String.class), TestScope.class,
+        method, tags, new Errors());
     Key<?> two = Key.get(String.class, arg(TestScope.class));
     
     assertEquals(one, two);

@@ -1,13 +1,12 @@
 package org.unseen.guice.composite.scopes;
 
 import static com.google.inject.internal.Annotations.getKey;
+import static org.unseen.guice.composite.scopes.Args.arg;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.List;
-
 
 import com.google.inject.ConfigurationException;
 import com.google.inject.Key;
@@ -15,8 +14,6 @@ import com.google.inject.ProvisionException;
 import com.google.inject.TypeLiteral;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
-
-import static org.unseen.guice.composite.scopes.Args.*;
 
 /**
  * Implements a single factory method.
@@ -42,13 +39,13 @@ public class FactoryMethodImpl implements FactoryMethod {
       this.result = getKey(factory.getReturnType(method), method, method.getAnnotations(), errors);
       
       /* Build this methods arguments */
-      Type[] paramTypes = method.getGenericParameterTypes();
+      List<TypeLiteral<?>> paramTypes = factory.getParameterTypes(method);
       Annotation[][] paramAnnotations = method.getParameterAnnotations();
-      Key<?>[] paramArray = new Key<?>[paramTypes.length];
+      Key<?>[] paramArray = new Key<?>[paramTypes.size()];
       Class<? extends Annotation> tag = scope.annotation();
       
       for (int p = 0; p < paramArray.length; p++) {
-        paramArray[p] = getParamKey(paramTypes[p], tag, method, paramAnnotations[p], errors);  
+        paramArray[p] = getParamKey(paramTypes.get(p), tag, method, paramAnnotations[p], errors);  
       }
     
       this.params = Arrays.asList(paramArray);
@@ -100,10 +97,10 @@ public class FactoryMethodImpl implements FactoryMethod {
    * in the process. If the key already has the {@literal @}Parameter annotation,
    * it is returned as-is to preserve any String value.
    */
-  public static Key<?> getParamKey(Type paramType, Class<? extends Annotation> scope,
+  public static Key<?> getParamKey(TypeLiteral<?> paramType, Class<? extends Annotation> scope,
       Method method, Annotation[] paramTags, Errors errors) throws ErrorsException {
     
-    Key<?> key = getKey(TypeLiteral.get(paramType), method, paramTags, errors); 
+    Key<?> key = getKey(paramType, method, paramTags, errors); 
 
     Class<? extends Annotation> tag = key.getAnnotationType();
     
