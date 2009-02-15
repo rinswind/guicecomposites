@@ -41,11 +41,9 @@ public class DynamicScopesLinkedBindingBuilderImpl<T> implements DynamicScopesLi
       throw new IllegalArgumentException(tag + " is not a scope annotation");
     }
     
-    Class<T> iface = (Class<T>) key.getTypeLiteral().getRawType();
-    
     /* Create a scope and a factory for that scope */
     DynamicScope scope = new DynamicScope(tag);
-    FactoryProvider<T> factory = new FactoryProvider<T>(iface, scope);
+    FactoryProvider<T> factory = new FactoryProvider<T>(key.getTypeLiteral(), scope);
     
     /* Bind the scope */
     binder.bindScope(tag, scope);
@@ -74,14 +72,12 @@ public class DynamicScopesLinkedBindingBuilderImpl<T> implements DynamicScopesLi
     /* We want to hide the parameter bindings in a private space */
     PrivateBinder privBinder = binder.newPrivateBinder();
     
-    Class<T> iface = (Class<T>) key.getTypeLiteral().getRawType();
-    
     /*
      * Create a scope and a factory for that scope. This scope has no associated
      * annotation.
      */
     DynamicScope scope = new DynamicScope(AnonymousScope.class);
-    FactoryProvider<T> factory = new FactoryProvider<T>(iface, scope);
+    FactoryProvider<T> factory = new FactoryProvider<T>(key.getTypeLiteral(), scope);
     
     /* Merge all parameters and return values into two unique sets */
     Set<Key<?>> params = new HashSet<Key<?>>();
@@ -96,7 +92,7 @@ public class DynamicScopesLinkedBindingBuilderImpl<T> implements DynamicScopesLi
       if (!returnKey.getTypeLiteral().getRawType().equals(impl)) {
         privBinder.bind(returnKey).to(impl).in(scope);
       } else {
-        privBinder.bind(returnKey);
+        privBinder.bind(returnKey).in(scope);
       }
       
       privBinder.expose(returnKey);

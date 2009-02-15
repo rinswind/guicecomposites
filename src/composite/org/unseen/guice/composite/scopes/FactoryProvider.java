@@ -18,6 +18,7 @@ import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.Provider;
 import com.google.inject.Scope;
+import com.google.inject.TypeLiteral;
 import com.google.inject.internal.Errors;
 import com.google.inject.spi.BindingScopingVisitor;
 import com.google.inject.spi.Message;
@@ -115,7 +116,7 @@ public class FactoryProvider<F> implements Provider<F> {
   };
   
   /** The interface of the factories we create */
-  private final Class<F> iface;
+  private final TypeLiteral<F> iface;
   /** The method suite of the factories we create */
   private final Map<Method, FactoryMethod> methods;
   
@@ -124,8 +125,8 @@ public class FactoryProvider<F> implements Provider<F> {
   /** Part of the state loaded into every created factory - injected later */
   private Injector injector;
   
-  public FactoryProvider(Class<F> iface, DynamicScope scope) {
-    if (!iface.isInterface()) {
+  public FactoryProvider(TypeLiteral<F> iface, DynamicScope scope) {
+    if (!iface.getRawType().isInterface()) {
       throw new ConfigurationException(Arrays.asList(new Message("Only interfaces can be used for "
           + " scope factories. Found a concrete class: " + iface)));
     }
@@ -135,9 +136,9 @@ public class FactoryProvider<F> implements Provider<F> {
     
     this.methods = new HashMap<Method, FactoryMethod>();
 
-    for (Class<?> cl = iface; cl != null; cl = iface.getSuperclass()) {
+    for (Class<?> cl = iface.getRawType(); cl != null; cl = cl.getSuperclass()) {
       for (Method method : cl.getMethods()) {
-        methods.put(method, new FactoryMethodImpl(method, scope));
+        methods.put(method, new FactoryMethodImpl(iface, method, scope));
       }
     }
   }
@@ -207,7 +208,10 @@ public class FactoryProvider<F> implements Provider<F> {
      * that is active right now.
      */
     FactoryInstance factory = new FactoryInstance(scope, active, injector, methods);
-
-    return iface.cast(Proxy.newProxyInstance(getClassLoader(iface), new Class[] {iface}, factory));
+    
+    @SuppressWarnings("unchecked")
+    Class<F> type = (Class<F>) iface.getRawType();
+    
+    return type.cast(Proxy.newProxyInstance(getClassLoader(type), new Class[] {type}, factory));
   }
 }
