@@ -1,6 +1,7 @@
 package org.unseen.guice.composite.injectors;
 
 import static com.google.inject.internal.Annotations.getKey;
+import static org.unseen.guice.composite.injectors.Args.arg;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -8,7 +9,7 @@ import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.List;
 
-import org.unseen.guice.composite.Arg;
+import org.unseen.guice.composite.injectors.Arg;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Binder;
@@ -20,8 +21,6 @@ import com.google.inject.TypeLiteral;
 import com.google.inject.internal.Errors;
 import com.google.inject.internal.ErrorsException;
 import com.google.inject.util.Providers;
-
-import static org.unseen.guice.composite.Args.*;
 
 /**
  * Implements a single factory method.

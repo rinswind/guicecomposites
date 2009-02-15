@@ -1,4 +1,4 @@
-package org.unseen.guice.composite;
+package org.unseen.guice.composite.injectors;
 
 import java.lang.annotation.Annotation;
 

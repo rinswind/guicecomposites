@@ -9,7 +9,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 import org.junit.Test;
-import org.unseen.guice.composite.Arg;
+import org.unseen.guice.composite.scopes.Arg;
 import org.unseen.guice.composite.scopes.binder.DynamicScopesModule;
 
 import com.google.inject.Guice;
@@ -22,7 +22,7 @@ public class MultiMethodFactoryTests {
   @ScopeAnnotation
   @Retention(RUNTIME)
   @Target({TYPE, METHOD})
-  @interface ConnectionScoped {
+  @interface BoxScoped {
   }
   
   interface BoxFactory {
@@ -37,7 +37,7 @@ public class MultiMethodFactoryTests {
     final Integer num;
     
     @Inject
-    public IntegerBox(@Nullable @Arg Integer num) {
+    public IntegerBox(@Nullable @Arg(BoxScoped.class) Integer num) {
       this.num = num;
     }
   }
@@ -46,7 +46,7 @@ public class MultiMethodFactoryTests {
     final String str;
     
     @Inject
-    public StringBox(@Nullable @Arg String str) {
+    public StringBox(@Nullable @Arg(BoxScoped.class) String str) {
       this.str = str;
     }
   }
@@ -61,10 +61,10 @@ public class MultiMethodFactoryTests {
     Injector inj = Guice.createInjector(new DynamicScopesModule() {
       @Override
       protected void configure() {
-        bind(BoxFactory.class).toScope(ConnectionScoped.class);
-        bind(IntegerBox.class).in(ConnectionScoped.class);
-        bind(StringBox.class).in(ConnectionScoped.class);
-        bind(CombinedBox.class).in(ConnectionScoped.class);
+        bind(BoxFactory.class).toScope(BoxScoped.class);
+        bind(IntegerBox.class).in(BoxScoped.class);
+        bind(StringBox.class).in(BoxScoped.class);
+        bind(CombinedBox.class).in(BoxScoped.class);
       }
     });
     
