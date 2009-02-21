@@ -1,2 +1,0 @@
-#! /bin/bash
-java -cp /opt/eclipse-3.4.2/plugins/org.junit4_4.3.1/junit.jar:lib/guice-snapshot-20090205.jar:.classes/  org.junit.runner.JUnitCore org.unseen.guice.composite.scopes.test.DynamicScopesSuite
