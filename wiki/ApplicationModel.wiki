@@ -1,0 +1,10 @@
+#summary What kind of DI Guice Composites tries to support?
+
+= Introduction =
+
+Both Guice Composites extensions try to support a particular OO application model.
+
+
+= Details =
+
+Coming soon.
