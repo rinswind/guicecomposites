@@ -1,4 +1,4 @@
-#summary Uses nested dynamically generated scopes to track object graphs.
+#summary An extension that uses dynamically generated scopes to track object graphs.
 
 = Introduction =
 
@@ -13,4 +13,4 @@ The advantages Composite Scopes has over Composite Injectors are:
 
 The disadvantages are:
 
- * Less flexibility: Because Composite Injectors uses one Injector per object graph the user has the flexibility to mix in his own scoping for each generation of objects. Also this allows the injection of Providers or the Injector itself in conjunction with the generated factories. Composite Scopes uses scopes to track object graphs so the user has a caching strategy chosen for him. Also because of the way Composite Scopes captures the local object context it does not tolerate the injection of other factory-like objects except it's own dynamically generated factories.
+ * Less flexibility: Because Composite Injectors uses one Injector per object graph the user has the flexibility to use his own scoping for each generation of objects. Also this allows the injection of Providers or the Injector in conjunction with the generated factories. Composite Scopes uses scopes to track object graphs so the user has a caching strategy chosen for him. Also because of the way Composite Scopes captures the local object context it does not tolerate the injection of other factory-like objects except it's own dynamically generated factories.
