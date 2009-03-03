@@ -1,4 +1,4 @@
-#summary Description of the Composite Scopes extension.
+#summary Composite Scopes - the more advanced sustained DI extension.
 
 = Introduction =
 
