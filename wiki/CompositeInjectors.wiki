@@ -1,4 +1,4 @@
-#summary Describes the Composite Injectors extension
+#summary Uses nested Injectors to track object graphs.
 
 = Introduction =
 
@@ -7,4 +7,4 @@ Composite Injectors is the first attempt at sustained dependency injection. Rath
 
 = Details =
 
-Coming soon
+Composite Injectors evolved from the AssistedInject Guice extension.
