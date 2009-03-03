@@ -1,4 +1,4 @@
-#summary Uses nested Injectors to track object graphs.
+#summary An extension that uses nested Injectors to track object graphs.
 
 = Introduction =
 
