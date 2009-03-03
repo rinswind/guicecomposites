@@ -1,4 +1,4 @@
-#summary Composite Scopes - the more advanced sustained DI extension.
+#summary Uses nested dynamically generated scopes to track object graphs.
 
 = Introduction =
 
