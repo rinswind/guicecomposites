@@ -2,9 +2,8 @@
 
 = Introduction =
 
-Both Guice Composites extensions try to support a particular OO application model.
-
+Both Guice Composites extensions try to support a particular OO application model. I feel this model is quite common in OO and reflects the structure of most monolithic pieces of an app. E.g. even if an app is distributed as plugins in a framework each plugin is likely to be structured as follows:
 
 = Details =
 
-Coming soon.
+Every OO app consists of graphs of collaborating objects. There us usually an initial graph of the longest-lived objects. I call these the _initial set of singletons_. For example a when a server app starts it will create an object that drives the accept loop and say an object that parses requests. As these singletons work they will spawn graphs of shorter lifespan. When such a graph is created the older objects that created it can choose to retain some reference to it - store it in a list of similar graphs of example. I call these _forward references_. The objects of the new graph on the other hand can require references to their parents in setters or constructors. I call these _back references_. For example the accept loop object will create a Connection object to handle each incoming connection. It may collect these Connections in a list so it can close them all in case of a shutdown. The Connection object on the other hand wants a reference to the common Parser service in it's constructor. 
