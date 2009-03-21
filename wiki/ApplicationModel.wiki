@@ -14,4 +14,4 @@ So the vocabulary of the model is:
  * internal reference: Between objects of the same scope instance. Usually 1-to-1. Resolved by Guice.
  * forward reference: From objects of a parent scope instance to objects of child scope instance. Must be 1-to-n. Resolved by the App.
  * back reference: From objects of a child scope instance to objects of a parent scope instance. Must be n-to-1. Resolved by Guice.
- * free parameter object: Created without DI and passed into a new scope instance. Passed by the application into a new scope instance.
+ * free parameter object: Created without DI and passed into a new scope instance. Passed by the App into a new scope instance.
