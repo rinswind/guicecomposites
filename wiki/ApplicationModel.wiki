@@ -10,8 +10,9 @@ Every OO app consists of graphs of collaborating objects. There is usually an in
 
 So the vocabulary of the model is:
  * scope:
- * scope instance:
+ * scope instance: A set of objects with a common lifecycle. Created by a scope intance factory.
+ * scope instance factory: Dynamically generated factory called by the App to spawn new scope instances.
  * internal reference: Between objects of the same scope instance. Usually 1-to-1. Resolved by Guice.
  * forward reference: From objects of a parent scope instance to objects of child scope instance. Must be 1-to-n. Resolved by the App.
  * back reference: From objects of a child scope instance to objects of a parent scope instance. Must be n-to-1. Resolved by Guice.
- * free parameter object: Created without DI. Passed by the App into a new scope instance.
+ * scope instance parameter: An object passed to a method of a scope instance factory. Obtained by the App without DI. These objects become equal members of the new scope instance.
