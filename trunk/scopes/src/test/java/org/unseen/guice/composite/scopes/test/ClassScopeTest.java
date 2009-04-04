@@ -12,6 +12,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.awt.Color;
@@ -55,11 +56,11 @@ public class ClassScopeTest {
 
     Mustang blueMustang = (Mustang) carFactory.create(BLUE);
     assertEquals(BLUE, blueMustang.color);
-    assertEquals(5.0d, blueMustang.engineSize);
+    assertTrue(5.0d - blueMustang.engineSize == 0);
 
     Mustang redMustang = (Mustang) carFactory.create(RED);
     assertEquals(RED, redMustang.color);
-    assertEquals(5.0d, redMustang.engineSize);
+    assertTrue(5.0d - redMustang.engineSize == 0);
   }
 
   @Test
@@ -138,7 +139,7 @@ public class ClassScopeTest {
 
     Corvette redCorvette = (Corvette) carFactory.create(RED, false);
     assertEquals(RED, redCorvette.color);
-    assertEquals(140f, redCorvette.maxMph);
+    assertTrue(140f - redCorvette.maxMph == 0);
     assertFalse(redCorvette.isConvertable);
   }
 
@@ -196,7 +197,7 @@ public class ClassScopeTest {
 
     Porshe grayPorshe = (Porshe) carFactory.create(GRAY);
     assertEquals(GRAY, grayPorshe.color);
-    assertEquals(50000d, grayPorshe.price);
+    assertTrue(50000d - grayPorshe.price == 0);
     assertEquals(911, grayPorshe.model);
     assertEquals("turbo", grayPorshe.name);
   }
@@ -539,7 +540,7 @@ public class ClassScopeTest {
 
     Mustang mustang = factory.create(RED);
     assertSame(RED, mustang.color);
-    assertEquals(5.0d, mustang.engineSize);
+    assertTrue(5.0d - mustang.engineSize == 0);
   }
 
   static class Fleet {
@@ -569,7 +570,7 @@ public class ClassScopeTest {
     Fleet fleet = fleetFactory.createFleet(RED);
 
     assertSame(RED, fleet.mustang.color);
-    assertEquals(5.0d, fleet.mustang.engineSize);
+    assertTrue(5.0d - fleet.mustang.engineSize == 0);
     assertSame(RED, fleet.camaro.color);
     assertEquals(250, fleet.camaro.horsePower);
     assertEquals(1984, fleet.camaro.modelYear);
@@ -731,7 +732,7 @@ public class ClassScopeTest {
 
     Mustang blueMustang = mustangFactory.create(BLUE);
     assertEquals(BLUE, blueMustang.color);
-    assertEquals(5.0d, blueMustang.engineSize);
+    assertTrue(5.0d - blueMustang.engineSize == 0);
 
     Camaro redCamaro = camaroFactory.create(RED);
     assertEquals(RED, redCamaro.color);
@@ -795,12 +796,12 @@ public class ClassScopeTest {
         .getInstance(CamaroInsuranceFactory.class);
 
     MustangInsurance mustangPolicy = (MustangInsurance) mustangInsuranceFactory.create(800.0d);
-    assertEquals(800.0d, mustangPolicy.premium);
-    assertEquals(50000.0d, mustangPolicy.limit);
+    assertTrue(800.0d - mustangPolicy.premium == 0);
+    assertTrue(50000.0d - mustangPolicy.limit == 0);
 
     CamaroInsurance camaroPolicy = (CamaroInsurance) camaroInsuranceFactory.create(800.0d);
-    assertEquals(800.0d, camaroPolicy.premium);
-    assertEquals(100000.0d, camaroPolicy.limit);
+    assertTrue(800.0d - camaroPolicy.premium == 0);
+    assertTrue(100000.0d - camaroPolicy.limit == 0);
   }
 
   public interface InsuranceFactory<T extends Car> {
@@ -830,11 +831,11 @@ public class ClassScopeTest {
         .get(camaroInsuranceFactoryType));
 
     MustangInsurance mustangPolicy = (MustangInsurance) mustangInsuranceFactory.create(800.0d);
-    assertEquals(800.0d, mustangPolicy.premium);
-    assertEquals(50000.0d, mustangPolicy.limit);
+    assertTrue(800.0d - mustangPolicy.premium == 0);
+    assertTrue(50000.0d - mustangPolicy.limit == 0);
 
     CamaroInsurance camaroPolicy = (CamaroInsurance) camaroInsuranceFactory.create(800.0d);
-    assertEquals(800.0d, camaroPolicy.premium);
-    assertEquals(100000.0d, camaroPolicy.limit);
+    assertTrue(800.0d - camaroPolicy.premium == 0);
+    assertTrue(100000.0d - camaroPolicy.limit == 0);
   }
 }
