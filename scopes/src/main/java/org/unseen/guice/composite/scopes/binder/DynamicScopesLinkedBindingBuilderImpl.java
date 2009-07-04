@@ -11,7 +11,7 @@ import org.unseen.guice.composite.scopes.FactoryProvider;
 
 import com.google.inject.Binder;
 import com.google.inject.Key;
-import com.google.inject.binder.PrivateBinder;
+import com.google.inject.PrivateBinder;
 import com.google.inject.Provider;
 import com.google.inject.Scope;
 import com.google.inject.ScopeAnnotation;
