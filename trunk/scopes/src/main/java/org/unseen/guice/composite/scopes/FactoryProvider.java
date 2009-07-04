@@ -1,3 +1,18 @@
+/**
+ * Copyright (C) 2009 Todor Boev
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.unseen.guice.composite.scopes;
 
 import static com.google.inject.internal.BytecodeGen.getClassLoader;
@@ -24,15 +39,20 @@ import com.google.inject.spi.BindingScopingVisitor;
 import com.google.inject.spi.Message;
 
 /**
- * @author Todor Boev
+ * Provider used to create new instances of scope factories. These instances are
+ * injected into objects that need to call back into Guice to continue the
+ * object creation at a later point.
+ * 
+ * @author rinsvind@gmail.com (Todor Boev)
+ * 
  * @param <F>
  */
 public class FactoryProvider<F> implements Provider<F> {
-  private static final FactoryMethod EQUALS =  new FactoryMethod() {
+  private static final FactoryMethod EQUALS = new FactoryMethod() {
     public Object invoke(Object proxy, FactoryInstance instance, Object[] args) throws Throwable {
       return args[0] == proxy || args[0] == instance;
     }
-    
+
     public List<Key<?>> parameterTypes() {
       throw new UnsupportedOperationException();
     }
@@ -41,12 +61,12 @@ public class FactoryProvider<F> implements Provider<F> {
       throw new UnsupportedOperationException();
     }
   };
-  
-  private static final FactoryMethod TO_STRING =  new FactoryMethod() {
+
+  private static final FactoryMethod TO_STRING = new FactoryMethod() {
     public Object invoke(Object proxy, FactoryInstance instance, Object[] args) throws Throwable {
       return proxy.getClass().getInterfaces()[0].getName();
     }
-    
+
     public List<Key<?>> parameterTypes() {
       throw new UnsupportedOperationException();
     }
@@ -55,12 +75,12 @@ public class FactoryProvider<F> implements Provider<F> {
       throw new UnsupportedOperationException();
     }
   };
-  
-  private static final FactoryMethod HASH_CODE =  new FactoryMethod() {
+
+  private static final FactoryMethod HASH_CODE = new FactoryMethod() {
     public Object invoke(Object proxy, FactoryInstance instance, Object[] args) throws Throwable {
       return instance.hashCode();
     }
-    
+
     public List<Key<?>> parameterTypes() {
       throw new UnsupportedOperationException();
     }
@@ -69,7 +89,7 @@ public class FactoryProvider<F> implements Provider<F> {
       throw new UnsupportedOperationException();
     }
   };
-  
+
   /**
    *
    */
@@ -78,28 +98,28 @@ public class FactoryProvider<F> implements Provider<F> {
     private final Object source;
     private final DynamicScope expected;
     private final Errors errors;
-    
+
     public ScopeChecker(DynamicScope expected, String checked, Object source, Errors errors) {
       this.checked = checked;
       this.source = source;
       this.expected = expected;
       this.errors = errors;
     }
-    
+
     public Void visitScopeAnnotation(Class<? extends Annotation> tag) {
       if (expected.annotation() != tag) {
         error(tag);
       }
       return null;
     }
-    
+
     public Void visitScope(Scope scope) {
       if (expected != scope) {
         error(scope);
       }
       return null;
     }
-    
+
     public Void visitEagerSingleton() {
       error("Eager Singleton");
       return null;
@@ -111,29 +131,30 @@ public class FactoryProvider<F> implements Provider<F> {
     }
 
     private void error(Object found) {
-      errors.withSource(source).addMessage("For %s expected scope %s but found %s", checked, expected, found);
+      errors.withSource(source).addMessage("For %s expected scope %s but found %s", checked,
+          expected, found);
     }
   };
-  
+
   /** The interface of the factories we create */
   private final TypeLiteral<F> iface;
   /** The method suite of the factories we create */
   private final Map<Method, FactoryMethod> methods;
-  
+
   /** Part of the state loaded into every created factory */
   private final DynamicScope scope;
   /** Part of the state loaded into every created factory - injected later */
   private Injector injector;
-  
+
   public FactoryProvider(TypeLiteral<F> iface, DynamicScope scope) {
     if (!iface.getRawType().isInterface()) {
       throw new ConfigurationException(Arrays.asList(new Message("Only interfaces can be used for "
           + " scope factories. Found a concrete class: " + iface)));
     }
-    
+
     this.iface = iface;
     this.scope = scope;
-    
+
     this.methods = new HashMap<Method, FactoryMethod>();
 
     for (Class<?> cl = iface.getRawType(); cl != null; cl = cl.getSuperclass()) {
@@ -149,14 +170,14 @@ public class FactoryProvider<F> implements Provider<F> {
   public Map<Method, FactoryMethod> methodSuite() {
     return methods;
   }
-  
+
   /**
    * At injector-creation time, validate the the factory method suite.
    */
   @Inject
   public void setInjector(Injector injector) {
     this.injector = injector;
-    
+
     /*
      * Validate that the product of the factory can be built and that the
      * product is in the same scope as the factory.
@@ -166,14 +187,15 @@ public class FactoryProvider<F> implements Provider<F> {
     for (Map.Entry<Method, FactoryMethod> ent : methods.entrySet()) {
       try {
         binding = injector.getBinding(ent.getValue().returnType());
-        
+
         /*
          * If this is not an anonymous singleton dynamic scope we must validate
          * that the user has bound all return values to the same scope as the
          * one managed by this factory.
          */
         if (this.scope.annotation() != AnonymousScope.class) {
-          binding.acceptScopingVisitor(new ScopeChecker(this.scope, "return value", ent.getKey(), errors));
+          binding.acceptScopingVisitor(new ScopeChecker(this.scope, "return value", ent.getKey(),
+              errors));
         }
       } catch (ConfigurationException e) {
         errors.merge(e.getErrorMessages());
@@ -200,18 +222,22 @@ public class FactoryProvider<F> implements Provider<F> {
    * @see com.google.inject.Provider#get()
    */
   public F get() {
-    /* Capture the current scope if any - this is the last part of the instance state */
-    DynamicScopeInstance active = DynamicScopeInstance.isActive() ? DynamicScopeInstance.active() : null;
-    
+    /*
+     * Capture the current scope if any - this is the last part of the instance
+     * state
+     */
+    DynamicScopeInstance active = DynamicScopeInstance.isActive() ? DynamicScopeInstance.active()
+        : null;
+
     /*
      * Return a factory that will continue the creation starting from the
      * dynamic scope instance that is active right now.
      */
     FactoryInstance factory = new FactoryInstance(scope, active, injector, methods);
-    
+
     @SuppressWarnings("unchecked")
     Class<F> type = (Class<F>) iface.getRawType();
-    
-    return type.cast(Proxy.newProxyInstance(getClassLoader(type), new Class[] {type}, factory));
+
+    return type.cast(Proxy.newProxyInstance(getClassLoader(type), new Class[] { type }, factory));
   }
 }
